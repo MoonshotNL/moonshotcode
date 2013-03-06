@@ -43,6 +43,17 @@ echo "	stop" >> $INITSCRIPT
 echo "	start" >> $INITSCRIPT
 echo "}" >> $INITSCRIPT
 echo "" >> $INITSCRIPT
+echo "status()" >> $INITSCRIPT
+echo "{" >> $INITSCRIPT
+echo "	PIDS=\`pgrep -f /usr/local/sbin/sshd\`" >> $INITSCRIPT
+echo "	if [ -n \"\$PIDS\" ]" >> $INITSCRIPT
+echo "	then" >> $INITSCRIPT
+echo "		echo \"sshd is running...\"" >> $INITSCRIPT
+echo "	else" >> $INITSCRIPT
+echo "		echo \"sshd is not running...\"" >> $INITSCRIPT
+echo "	fi" >> $INITSCRIPT
+echo "}" >> $INITSCRIPT
+echo "" >> $INITSCRIPT
 echo "case \"\$1\" in" >> $INITSCRIPT
 echo "	start)" >> $INITSCRIPT
 echo "		start" >> $INITSCRIPT
@@ -53,8 +64,11 @@ echo "		;;" >> $INITSCRIPT
 echo "	restart)" >> $INITSCRIPT
 echo "		restart" >> $INITSCRIPT
 echo "		;;" >> $INITSCRIPT
+echo "	status)" >> $INITSCRIPT
+echo "		status" >> $INITSCRIPT
+echo "		;;" >> $INITSCRIPT
 echo "	*)" >> $INITSCRIPT
-echo "		echo \"Usage: \$0 {start|stop|restart}\"" >> $INITSCRIPT
+echo "		echo \"Usage: \$0 {start|stop|restart|status}\"" >> $INITSCRIPT
 echo "esac" >> $INITSCRIPT
 
 chmod +x $INITSCRIPT
