@@ -6,6 +6,7 @@ yum -yq install pam-devel.x86_64
 yum -yq install wget
 yum -yq install make
 yum -yq install gcc
+yum -yq install gdb
 
 wget http://ftp.nluug.nl/pub/OpenBSD/OpenSSH/portable/openssh-6.1p1.tar.gz
 tar -xzf openssh-6.1p1.tar.gz
