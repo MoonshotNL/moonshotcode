@@ -8,9 +8,9 @@ yum -yq install make
 yum -yq install gcc
 yum -yq install gdb
 
-wget http://ftp.nluug.nl/pub/OpenBSD/OpenSSH/portable/openssh-6.1p1.tar.gz
-tar -xzf openssh-6.1p1.tar.gz
-cd openssh-6.1p1
+wget http://www.mindrot.org/openssh_snap/openssh-SNAP-20130322.tar.gz
+tar -xzf openssh-SNAP-20130322.tar.gz
+cd openssh
 
 ./configure --with-pam --sysconfdir=/etc/ssh
 
