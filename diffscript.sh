@@ -6,8 +6,13 @@ then
 	exit
 fi
 
+STARTLOC=`pwd`
+
 cd $1
 LIST1=*
+
+cd $STARTLOC
+
 cd $2
 LIST2=*
 
