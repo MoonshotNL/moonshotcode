@@ -27,12 +27,12 @@ do
 	#If $l1 existed in $LIST2
 	if [ $FOUND -eq 1 ]
 	then
-		RESULT=`diff $l1 $l2`
-		if [ -n $RESULT ]
+		RESULT=`diff $1/$l1 $2/$l2`
+		if [ -n "$RESULT" ]
 		then
-			echo "$l1 / $l2 is unmodified"
-		else
 			echo "$l1 / $l2 is modified"
+		else
+			echo "$l1 / $l2 is not modified"
 		fi
 	fi
 done
