@@ -1,0 +1,5 @@
+Deffie-Hellman Key Exchange
+
+Officially part of the S/MIMEv2 & S/MIMEv3 RFC Message Specification
+Probably not part of NIKHEF's idea for pub/privkey outer-tunnel encryption using certificates to allow host verification
+id-rsa
