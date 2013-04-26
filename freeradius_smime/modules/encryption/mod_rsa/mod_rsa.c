@@ -3,22 +3,22 @@ unsigned char *rsa_pub_encrypt(unsigned char *input, int input_len, int *msg_len
 	return rsa_generic(input, input_len, msg_len, key, 1, 0);
 }
 
-unsigned char *rsa_pub_decrypt(unsigned char *input, int *msg_len, RSA *key)
+unsigned char *rsa_pub_decrypt(unsigned char *input, int input_len, int *msg_len, RSA *key)
 {
 	return rsa_generic(input, input_len, msg_len, key, 0, 0);
 }
 
-unsigned char *rsa_priv_encrypt(unsigned char *input, int *msg_len, RSA *key)
+unsigned char *rsa_priv_encrypt(unsigned char *input, int input_len, int *msg_len, RSA *key)
 {
 	return rsa_generic(input, input_len, msg_len, key, 1, 1);
 }
 
-unsigned char *rsa_priv_decrypt(unsigned char *input, int *msg_len, RSA *key)
+unsigned char *rsa_priv_decrypt(unsigned char *input, int input_len, int *msg_len, RSA *key)
 {
 	return rsa_generic(input, input_len, msg_len, key, 0, 1);
 }
 
-unsigned char *rsa_generic(unsigned char *input, int input_len , int *msg_len, RSA *key, unsigned char is_encrypting, unsigned char is_privkey)
+unsigned char *rsa_generic(unsigned char *input, int input_len, int *msg_len, RSA *key, unsigned char is_encrypting, unsigned char is_privkey)
 {
 	int (*crypt_p)(int, const unsigned char*, unsigned char*, RSA*, int);
 	int key_len, block_len, read_len, write_len;
