@@ -26,4 +26,8 @@ cd ./rlm_testing
 mv rlm_example.c rlm_testing.c
 cat configure.in | awk '{gsub("example", "testing"); print}' > configure.in.tmp
 mv -f configure.in.tmp configure.in
+cat Makefile.in | awk '{gsub("example", "testing"); print}' > Makefile.in.tmp
+mv -f Makefile.in.tmp Makefile.in
+cat rlm_testing.c | awk '{gsub("example", "testing"); print}' > rlm_testing.c.tmp
+mv -f rlm_testing.c.tmp rlm_testing.c
 ./configure
