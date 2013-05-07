@@ -1,11 +1,11 @@
 #CentOS 6.4 64-bit clean install expected
 
-yum update -y
+yum -y update
 
-yum install -y make
-yum install -y gcc
-yum install -y wget
-yum install -y openssl-devel
+yum -y install make
+yum -y install gcc
+yum -y install wget
+yum -y install openssl-devel
 
 cd /usr/src
 wget ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-2.1.12.tar.gz
