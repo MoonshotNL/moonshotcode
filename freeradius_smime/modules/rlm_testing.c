@@ -2,9 +2,8 @@
 RCSID("$Id$")
 
 #include <freeradius-devel/radiusd.h>
+#include <freeradius-devel/radius.h>
 #include <freeradius-devel/modules.h>
-#include <freeradius-devel/libradius.h> //For fr_packet_codes struct
-#include <string.h>
 
 typedef struct rlm_testing_t {
 	char		*string;
@@ -53,7 +52,7 @@ static int testing_postauth(void *instance, REQUEST *request)
 	instance = instance;
 	request = request;
 
-	if (strcmp(fr_packet_codes[request->reply->code], "Access-Accept"))
+	if (request->reply->code == PW_AUTHENTICATION_ACK)
 	{
 		//Access-Accept trigger
 	}
