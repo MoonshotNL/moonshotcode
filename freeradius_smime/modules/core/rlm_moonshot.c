@@ -5,7 +5,8 @@ RCSID("$Id$")
 #include <freeradius-devel/radius.h>
 #include <freeradius-devel/modules.h>
 
-#include "certificate.h"
+#include "proxymodule.h"
+#include "idpmodule.h"
 
 typedef struct rlm_moonshot_t {
 	char		*string;
