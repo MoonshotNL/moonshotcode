@@ -59,7 +59,7 @@ static int moonshot_postauth(void *instance, REQUEST *request)
 
 	if (request->reply->code == PW_AUTHENTICATION_ACK)
 	{
-		handle_sentrequests(request);
+		handle_requests(request);
 	}
 
 	return RLM_MODULE_OK;
