@@ -1,5 +1,5 @@
-TARGET		= rlm_testing
-SRCS		= rlm_testing.c
+TARGET		= rlm_moonshot
+SRCS		= rlm_moonshot.c
 HEADERS		= config.h
 RLM_CFLAGS	=
 RLM_LIBS	= 

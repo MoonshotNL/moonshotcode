@@ -21,11 +21,11 @@
 #
 #######################################################################
 TARGET      = @targetname@
-SRCS        = rlm_testing.c
+SRCS        = rlm_moonshot.c
 HEADERS     = other.h
-RLM_CFLAGS  = @testing_cflags@
-RLM_LIBS    = @testing_ldflags@
-RLM_INSTALL = install-testing
+RLM_CFLAGS  = @moonshot_cflags@
+RLM_LIBS    = @moonshot_ldflags@
+RLM_INSTALL = install-moonshot
 
 ## this uses the RLM_CFLAGS and RLM_LIBS and SRCS defs to make TARGET.
 include ../rules.mak
@@ -33,5 +33,5 @@ include ../rules.mak
 $(LT_OBJS): $(HEADERS)
 
 ## the rule that RLM_INSTALL tells the parent rules.mak to use.
-install-testing:
+install-moonshot:
 	touch .

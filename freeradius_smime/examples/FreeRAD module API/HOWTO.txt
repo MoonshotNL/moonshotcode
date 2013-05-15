@@ -6,7 +6,7 @@ How-To RADIUSv2 modules:
 	-Downloads, compiles and installs freeradius 2.1.12 (CentOS stable version)
 	-Prepares a directory in /usr/src/freeradius-2.1.12/src/modules/rlm_testing for a testing module with neccesary configure, makefile and source files ready.
 
-2. Editing the example module (testing.c):
+2. Editing the example module (rlm_testing.c):
 	-37: struct containing configuration information, can be removed
 	-53: Mapping the modules config file attributes to the struct at line 37. Can be removed as well
 	-73: The init function. All but the "return 0;" line can be removed for now
@@ -18,7 +18,7 @@ How-To RADIUSv2 modules:
 	-203: Exit method. Free up any allocated resources
 	-218: Where all the magic happens. This binds the different functions to their API hook. We're interested in pre- or post-proxy for cert injection and post-auth for adding attribute requests if the message is determined to be an Access-Accept.
 	
-3. Building and testing the example module (testing.c):
+3. Building and testing the example module (rlm_testing.c):
 	If you didn't fuck anything up editing the module (unedited this works):
 	-In /usr/src/freeradius-2.1.12/src/modules/rlm_testing, do "make; make install"
 	-In /usr/local/etc/raddb/modules add file "testing" containing:
