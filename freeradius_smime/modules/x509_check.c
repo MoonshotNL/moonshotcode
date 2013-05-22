@@ -12,10 +12,12 @@ Momenteel gaan we alle root CA files af totdat we de juiste hebben. Voor optimal
  een I/O operation per keer worden uitgevoerd.
  */
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <openssl/cms.h>
 #include <openssl/ssl.h>
+#DEFINE CAPATH "/etc/ssl/certs"
 
 typedef struct attr_req
 {
@@ -35,11 +37,23 @@ int check_certificate(REQUEST *request)
     SSL_METHOD *meth;
     meth = SSLv23_method();
     
+    
+    
+    
     //file moet nog veranderd worden
     
     ctx = SSL_CTX_new(meth);
     //int SSL_CTX_use_certificate_file(SSL_CTX *ctx,const char *file,int type)
-    SSL_CTX_use_certificate_file(ctx, file, SSL_FILETYPE_PEM)
+    SSL_CTX_use_certificate_file(ctx, file, SSL_FILETYPE_PEM);
+    
+    /*
+     CAfile en CApath moeten nog meegestuurd worden
+     Kan gedaan worden door een loop te maken waarin alle CAfiles worden afgegaan totdat we de juiste hebben
+     */
+    
+    //int SSL_CTX_load_verify_locations(SSL_CTX *ctx, const char *CAfile, const char *CApath);
+    
+    SSL_CTX_load_verify_locations(ctx, NULL, CApath);
     
     /* Set a callback function (verify_callback) for peer certificate */
     /* verification */
@@ -47,6 +61,7 @@ int check_certificate(REQUEST *request)
     /* Set the verification depth to 1 */
     //SSL_CTX_set_verify_depth(ctx,1);
     
+    //SSL_CTX_set_verify returns nothing, checking with SSL_get_verify which will return X509_v_OK if there are no errors
     if(SSL_get_verify_result  = X509_V_OK )
     {
         return 1;
