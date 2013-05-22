@@ -1,0 +1,65 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1187\cocoasubrtf370
+{\fonttbl\f0\fnil\fcharset0 Menlo-Regular;}
+{\colortbl;\red255\green255\blue255;\red0\green116\blue0;\red170\green13\blue145;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\deftab529
+\pard\tx529\pardeftab529\pardirnatural
+
+\f0\fs22 \cf2 \CocoaLigature0 /* Step 1. Obtain CA certificate.\
+ * This example assumes the CA certificate is a DER encode X.509\
+ * certificate that is available in memory.\
+ * Use R_CERT_from_binary() to create a certificate object from\
+ * the binary data.\
+ * The CA certificate can now be manipulated programmatically.\
+ */\cf0 \
+ret = R_CERT_from_binary(cert_ctx, R_FLAG_SHARE_DATA,\
+                         R_CERT_TYPE_X509, ca_cert_len, ca_cert_data, \cf3 NULL\cf0 ,\
+                         &ca_cert);\
+\cf3 if\cf0  (ret != R_ERROR_NONE)\
+\cf3 goto\cf0  err;\
+\
+\cf2 /* Step 2. Extract public key from CA certificate.\
+ * The public key is used to verify the entity\'92s certificate.\
+ * Use R_CERT_public_key_to_R_PKEY() to create a public key\
+ * object from the certificate object.\
+ * The public key can now be used in the verification operation.\
+ */\cf0 \
+ret = R_CERT_public_key_to_R_PKEY(ca_cert, R_FLAG_SHAR_DATA,\
+                                  &ca_pkey);\
+\cf3 if\cf0  (ret != R_ERROR_NONE)\
+\cf3 goto\cf0  err;\
+\
+\cf2 /* Step 3. Obtain entity\'92s certificate.\
+ * This example assumes the entity\'92s certificate is a DER encode\
+ * X.509 certificate that is available in memory.\
+ * Use R_CERT_from_binary() to create a certificate object from\
+ * the binary data.\
+ * The entity\'92s certificate can now be manipulated programmatically.\
+ */\cf0 \
+ret = R_CERT_from_binary(cert_ctx,\
+                         R_FLAG_SHARE_DATA, R_CERT_TYPE_X509,\
+                         cert_len, cert_data, \cf3 NULL\cf0 , &cert);\
+\cf3 if\cf0  (ret != R_ERROR_NONE)\
+\cf3 goto\cf0  err;\
+\
+\cf2 /* Step 4. Verify signature in entity\'92s certificate with the public\
+ *         key.\
+ * Perform a verification operation on the entity\'92s certificate\
+ * object with the public key object.\
+ * Use R_CERT_verify() to perform the verification.\
+ * An error is returned if the inputs are invalid. For example the\
+ * public key is a DSA key and the signature was created with an RSA\
+ * key.\
+ * Whether the certificate data is cryptographically valid is\
+ * returned through the third parameter - verified.\
+ * A value of 1 indicates the certificate\'92s signature was valid and a\
+ * value of 0 indicates that the certificate\'92s signature was not\
+ * valid.\
+ */\cf0 \
+ret = R_CERT_verify(cert, ca_pkey, &verified);\
+If (ret != R_ERROR_NONE)\
+\cf3 goto\cf0  err;\
+\cf3 if\cf0  (verified)\
+printf(\'93Entity certificate verified\\n\'94);\
+\cf3 else\cf0 \
+printf(\'93Entity certificate not verified\\n\'94);}
