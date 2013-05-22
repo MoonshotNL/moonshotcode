@@ -23,20 +23,39 @@ typedef struct pkcs
 } PKCSCERT;
 #endif
 
-typedef struct attr_req
+typedef struct avp_struct
+{
+	int attr_len;
+	char *attribute;
+	int val_len;
+	char *value;
+} AVP;
+
+typedef struct attr_req_in
 {
 	unsigned long timestamp;
 	char *dn;
 	char *service;
 	int required_attr_len;
-	char *required_attr[ATTR_MAXLEN];
+	char **required_attr;
 	int requested_attr_len;
-	char *requested_attr[ATTR_MAXLEN];
-} ATTR_REQ;
+	char **requested_attr;
+} ATTR_REQ_IN;
 
-ATTR_REQ *parse_attr_req(char *input, int len)
+typedef struct attr_req_out
 {
-	ATTR_REQ *tmp_attr_req = rad_malloc(sizeof(ATTR_REQ));
+	unsigned long timestamp;
+	char *dn;
+	char *service;
+	int provided_attr_len;
+	AVP *provided_attr;
+	int requested_attr_len;
+	char **requested_attr;
+} ATTR_REQ_OUT;
+
+ATTR_REQ_IN *parse_attr_req(char *input, int len)
+{
+	ATTR_REQ_IN *tmp_attr_req = rad_malloc(sizeof(ATTR_REQ_IN));
 	int input_cur = 0;
 	
 	char item_tmp[STR_MAXLEN];
@@ -100,7 +119,17 @@ ATTR_REQ *parse_attr_req(char *input, int len)
 				{
 					item_tmp[item_cur] = '\0';
 					
-					tmp_attr_req.required_attr[attr_p] = rad_malloc(sizeof(char) * (item_cur + 1));
+					if (attr_p == 0)
+					{
+						tmp_attr_req->required_attr = rad_malloc(sizeof(char *));
+						tmp_attr_req.required_attr[attr_p] = rad_malloc(sizeof(char) * (item_cur + 1));
+					}
+					else
+					{
+						tmp_attr_req->required_attr = realloc(tmp_attr_req->required_attr, sizeof(char *) * (attr_p + 1));
+						tmp_attr_req.required_attr[attr_p] = rad_malloc(sizeof(char) * (item_cur + 1));
+					}
+
 					memcpy(tmp_attr_req.required_attr[attr_p], item_tmp, sizeof(char) * (item_cur + 1));
 					attr_p++;
 					
@@ -138,7 +167,18 @@ ATTR_REQ *parse_attr_req(char *input, int len)
 				{
 					item_tmp[item_cur] = '\0';
 					
-					tmp_attr_req.requested_attr[attr_p] = rad_malloc(sizeof(char) * (item_cur + 1));
+					if (attr_p == 0)
+					{
+						tmp_attr_req->requested_attr = rad_malloc(sizeof(char *));
+						tmp_attr_req.requested_attr[attr_p] = rad_malloc(sizeof(char) * (item_cur + 1));
+					}
+					else
+					{
+						tmp_attr_req->requested_attr = realloc(tmp_attr_req->required_attr, sizeof(char *) * (attr_p + 1));
+						tmp_attr_req.requested_attr[attr_p] = rad_malloc(sizeof(char) * (item_cur + 1));
+					}
+
+					
 					memcpy(tmp_attr_req.requested_attr[attr_p], item_tmp, sizeof(char) * (item_cur + 1));
 					attr_p++;
 					
@@ -162,8 +202,11 @@ ATTR_REQ *parse_attr_req(char *input, int len)
 	return tmp_attr_req;
 }
 
-int create_output_data(char *input, int input_len, char *output)
+int create_output_request(ATTR_REQ_IN *input, char *output)
 {
+	ATTR_REQ_OUT outstruct;
+	outstruct.timestamp = (long) time(0);
+	outstruct.dn = 
 	output = malloc(5);
 	strcpy(output, "abcd");
 	return 0;
@@ -201,5 +244,5 @@ void handle_request(REQUEST *request, VALUE_PAIR *vp)
 		return;
 	}
 	
-	output_len = create_output_request(input_data, input_len, &output_data);
+	output_len = create_output_request(attr_request, &output_data);
 }
