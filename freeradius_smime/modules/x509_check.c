@@ -28,7 +28,7 @@ int CMS_verify(CMS_ContentInfo *cms, STACK_OF(X509) *certs, X509_STORE *store, B
 
 //opzoek naar AVP_CERTIFICATE_RADIUS
 
-int check_certificate()
+int check_certificate(REQUEST *request)
 {
     char *certificate = find_certificate(request);
     SSL_CTX *ctx;
