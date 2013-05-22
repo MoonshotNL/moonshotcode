@@ -25,7 +25,7 @@ How-To RADIUSv2 modules:
 		testing {
 		
 		}
-	-In /usr/local/etc/raddb/sites-enabled/default, add "testing" in the appropriate segments (i.e.: post-auth { ... testing ... })
+	-In /usr/local/etc/raddb/sites-enabled/default, add "testing" iman pn the appropriate segments (i.e.: post-auth { ... testing ... })
 	-For a test user account, add the following to /usr/local/etc/raddb/users:
 		testing Cleartext-Password := "password"
 	-Start "radiusd -X"
