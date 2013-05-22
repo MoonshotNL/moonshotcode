@@ -16,7 +16,7 @@
 #define STATE_REQUESTED_ATTR_LEN	4
 #define STATE_REQUESTED_ATTR		5
 
-#ifndef PKCSCERT
+#ifndef DUMMY_SHOULD_BE_PROVIDED_BY_CERT_MODULE
 typedef struct pkcs
 {
 	int pubkey;
