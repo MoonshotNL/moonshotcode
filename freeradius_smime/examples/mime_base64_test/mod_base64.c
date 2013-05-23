@@ -5,6 +5,7 @@
 
 int base64_encode(char *input, int input_len, char **output)
 {
+	int out_len;
 	BIO *b64, *bio;
 	BUF_MEM *bptr;
 
@@ -21,9 +22,11 @@ int base64_encode(char *input, int input_len, char **output)
 	memcpy(*output, bptr->data, bptr->length);
 	output[bptr->length] = '\0';
 
+	out_len = bptr->length;
+
 	BIO_free_all(b64);
 
-	return bptr->length;
+	return out_len;
 }
 
 int base64_decode(char *input, int length, char **output)
@@ -39,9 +42,9 @@ int base64_decode(char *input, int length, char **output)
 	bmem = BIO_push(b64, bmem);
 
 	BIO_read(bmem, buffer, length);
-	buffer[length] = '\0';
+	BIO_flush(bmem);
+	buffer[length + 1] = '\0';
+	*output = buffer;;
 	BIO_free_all(bmem);
-	*output = buffer;
-
-	return strlen(buffer);
+	return strlen(*output);
 }

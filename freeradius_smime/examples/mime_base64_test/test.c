@@ -10,7 +10,9 @@ int main(void)
 	char *plaintext;
 	int plaintext_len;
 
-	mime_msg_len = pack_mime_text("Hello World!", strlen("Hello World!"), &mime_msg);
+	char *input = "5921305:DC=HVA,DC=NL,CN=Voms Server:2:UserName:VOMS-Password:1:ResearchGroup";
+
+	mime_msg_len = pack_mime_text(input, strlen(input), &mime_msg);
 	printf("%s\n", mime_msg);
 
 	plaintext_len = unpack_mime_text(mime_msg, mime_msg_len, &plaintext);

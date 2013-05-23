@@ -40,7 +40,7 @@ int unpack_mime_text(char *input, int len, char **output)
 
 	int output_len;
 
-	while (input_cur < len)
+	while (input_cur <= len)
 	{
 		switch(state)
 		{
@@ -65,7 +65,7 @@ int unpack_mime_text(char *input, int len, char **output)
 	}
 	base64_buffer[base64_buffer_cur] = '\0';
 
-	output_len = base64_decode(base64_buffer, strlen(base64_buffer), *output);
+	output_len = base64_decode(base64_buffer, base64_buffer_cur, output);
 
 	return output_len;
 }
