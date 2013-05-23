@@ -1,6 +1,6 @@
 #ifndef IDPMODULE_H
 #define IDPMODULE_H
 
-extern void handle_requests(REQUEST *request);
+extern void idp_handle_requests(REQUEST *request);
 
 #endif
