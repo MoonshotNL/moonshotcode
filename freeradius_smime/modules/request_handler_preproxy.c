@@ -15,11 +15,23 @@
 
 int handle_request(REQUEST *request, int type_request)
 {
+    
+    if(type_request == 1)
+    {
     char *certificate = get_mime_certificate();
     VALUE_PAIR *avp_certificate;
     avp_certificate = pairmake("AVP_CERTIFICATE_RADIUS",
                                certificate, T_OP_EQ);
     pairadd(&request->reply->vps, avp_certificate);
+    }
+    else if(type_request == 2)
+    {
+        char *certificate = get_mime_message();
+        VALUE_PAIR *avp_certificate;
+        avp_proxy = pairmake("AVP_CPROXY_RADIUS",
+                                   certificate, T_OP_EQ);
+        pairadd(&request->reply->vps, avp_proxy);
+    }
     
     return RLM_MODULE_UPDATED;
 }
