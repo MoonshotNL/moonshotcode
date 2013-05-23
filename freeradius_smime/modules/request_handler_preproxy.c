@@ -13,7 +13,7 @@
 #include "common.h"
 #include "mod_mime.h"
 
-int handle_cerinject(REQUEST *request)
+int handle_request(REQUEST *request, int type_request)
 {
     char *certificate = get_mime_certificate();
     VALUE_PAIR *avp_certificate;
