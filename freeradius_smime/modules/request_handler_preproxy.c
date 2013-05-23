@@ -1,5 +1,11 @@
+/*
+ TODO:
+ get_mime_certificate functie moet nog corresponderen met de mime module. Hierop moet nog gewacht worden omdat de mime module nog niet geheel af is.
+ get_mime_message functie moet nog corresponderen met de mime module. Hierop moet ook gewacht worden totdat de mime module af is.
+  */
+
 //
-//  insert_cert.c
+//  request_handler_preproxy.c
 //
 //
 //  Created by W.A. Miltenburg on 15-05-13.
