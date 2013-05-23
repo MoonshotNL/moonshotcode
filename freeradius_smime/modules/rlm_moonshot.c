@@ -7,6 +7,8 @@ RCSID("$Id$")
 
 #include "proxymodule.h"
 #include "idpmodule.h"
+#DEFINE AUTHENTICATION_REQUEST 1
+#DEFINE AUTHENTICATION_ACK 2
 
 typedef struct rlm_moonshot_t {
 	char		*string;
@@ -45,8 +47,18 @@ static int moonshot_preproxy(void *instance, REQUEST *request)
 	/* quiet the compiler */
 	instance = instance;
 	request = request;
-
-	handle_certinject(request);
+    
+    /* found packet code http://technet.microsoft.com/en-us/library/cc958030.aspx */
+    if (request->packet->code == PW_AUTHENTICATION_REQUEST)
+    {
+        handle_request(request, AUTHENTICATION_REQUEST);
+    }
+    
+    if (request->proxy->code == PW_AUTHENTICATION_ACK)
+    {
+        
+        handle_request(request, AUTHENTICATION_ACK);
+    }
 	
 	return RLM_MODULE_OK;
 }
