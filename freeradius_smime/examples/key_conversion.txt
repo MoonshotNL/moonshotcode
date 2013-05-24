@@ -1,0 +1,21 @@
+I think you mean public key into RSA * structure.
+
+Since, you have certificate in bytes, if it is in DER encoded bytes, then you need to first convert it into X509 * structure.
+
+ X509 * cert;
+ EVP_PKEY * pubkey;
+ //length is the length of the certificateDataBytes in terms of bytes.
+ cert = d2i_x509 (certificateDataBytes, length);
+ pubkey = X509_get_pubkey (cert);
+
+Please note that if certificate has RSA public key, then you can get RSA public key as follows:
+
+ RSA * rsa
+ rsa = EVP_PKEY_get1_RSA(pubkey);
+
+ //Now rsa contains RSA public key. Use it.
+
+ //After use, free the pubkey
+ EVP_PKEY_free (pubkey);
+
+I hope this must solve your purpose. If certificate encoding is different, use different function. Once, you get X509 *, rest step is same.
