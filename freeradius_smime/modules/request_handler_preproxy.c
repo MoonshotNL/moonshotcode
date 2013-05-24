@@ -18,26 +18,31 @@
 
 #include "common.h"
 #include "mod_mime.h"
+#DEFINE AUTHENTICATION_REQUEST 1
+#DEFINE AUTHENTICATION_ACK 2
 
 int handle_request(REQUEST *request, int type_request)
 {
-    
-    if(type_request == 1)
+    switch (type_request)
     {
-    char *certificate = get_mime_certificate();
-    VALUE_PAIR *avp_certificate;
-    avp_certificate = pairmake("AVP_CERTIFICATE_RADIUS",
-                               certificate, T_OP_EQ);
-    pairadd(&request->reply->vps, avp_certificate);
-    }
-    else if(type_request == 2)
-    {
-        char *message = get_mime_message();
-        VALUE_PAIR *avp_proxy;
-        avp_proxy = pairmake("AVP_CPROXY_RADIUS",
-                                   message, T_OP_EQ);
-        pairadd(&request->reply->vps, avp_proxy);
+        case AUTHENTICATION_REQUEST:
+            char *certificate = get_mime_certificate();
+            VALUE_PAIR *avp_certificate;
+            avp_certificate = pairmake("AVP_CERTIFICATE_RADIUS",
+                                       certificate, T_OP_EQ);
+            pairadd(&request->reply->vps, avp_certificate);
+            return RLM_MODULE_UPDATED;
+            break;
+            
+        case AUTHENTICATION_ACK:
+            char *message = get_mime_message();
+            VALUE_PAIR *avp_proxy;
+            avp_proxy = pairmake("AVP_PROXY_RADIUS",
+                                 message, T_OP_EQ);
+            pairadd(&request->reply->vps, avp_proxy);
+            return RLM_MODULE_UPDATED;
+            break;
     }
     
-    return RLM_MODULE_UPDATED;
+    
 }
