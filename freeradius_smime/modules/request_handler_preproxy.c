@@ -20,34 +20,35 @@
 
 #include "common.h"
 #include "mod_mime.h"
-#DEFINE AUTHENTICATION_REQUEST 1
-#DEFINE AUTHENTICATION_ACK 2
+#DEFINE AUTHENTICATION_REQUEST 1 //ACCEPT-REQUEST radius response
+#DEFINE AUTHENTICATION_ACK 2 //ACCEPT-ACCEPT radius response
 
 
 int handle_request(REQUEST *request, int type_request)
 {
-    switch (type_request)
+    switch (type_request) //it's allowed to handle multiple requests, the request type is based on radius responses
     {
         case AUTHENTICATION_REQUEST:
             char *certificate = get_mime_certificate();
             VALUE_PAIR *avp_certificate;
             avp_certificate = pairmake("AVP_CERTIFICATE_RADIUS",
-                                       certificate, T_OP_EQ);
-            pairadd(&request->reply->vps, avp_certificate);
-            return RLM_MODULE_UPDATED;
+                                       certificate, T_OP_EQ); //AVP_CERTIFICATE_RADIUS is an AVP that stores the certificate chain
+            pairadd(&request->reply->vps, avp_certificate); //add AVP
+            return RLM_MODULE_UPDATED;                      //we are basically saying that our AVPs are updated
             
         case AUTHENTICATION_ACK:
             
             VALUE_PAIR *vp = request->packet->vps;
             
             do {
-                if (vp->attribute == AVP_PROXY_REQUEST) {
+                if (vp->attribute == AVP_PROXY_REQUEST) //detect if AVP_PROXY_REQUEST is sent by the idp module
+                {
                     char *message_attributes = get_mime_attributes();
                     VALUE_PAIR *avp_attributes;
                     avp_attributes = pairmake("AVP_PROXY_ATTRIBUTES",
-                                         message_attributes, T_OP_EQ);
-                    pairadd(&request->reply->vps, avp_attributes);
-                    return RLM_MODULE_UPDATED;
+                                         message_attributes, T_OP_EQ); //AVP_PROXY_ATTRIBUTES is an AVP that stores the attributes
+                    pairadd(&request->reply->vps, avp_attributes); //add AVP
+                    return RLM_MODULE_UPDATED;                      //return statement that is needed when AVPs are updated
                 }
             } while ((vp = vp -> next) != 0);
             

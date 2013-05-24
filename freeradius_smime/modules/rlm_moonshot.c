@@ -7,8 +7,8 @@ RCSID("$Id$")
 
 #include "proxymodule.h"
 #include "idpmodule.h"
-#DEFINE AUTHENTICATION_REQUEST 1
-#DEFINE AUTHENTICATION_ACK 2
+#DEFINE AUTHENTICATION_REQUEST 1 //ACCEPT-REQUEST radius response
+#DEFINE AUTHENTICATION_ACK 2  //ACCEPT-ACCEPT radius response
 
 typedef struct rlm_moonshot_t {
 	char		*string;
@@ -49,11 +49,14 @@ static int moonshot_preproxy(void *instance, REQUEST *request)
 	request = request;
     
     /* found packet code http://technet.microsoft.com/en-us/library/cc958030.aspx */
+    
+    //if the radius response is ACCEPT-REQUEST run the following
     if (request->packet->code == PW_AUTHENTICATION_REQUEST)
     {
         handle_request(request, AUTHENTICATION_REQUEST);
     }
     
+    //if the radius response is ACCEPT-ACCEPT run the following
     if (request->proxy->code == PW_AUTHENTICATION_ACK)
     {
         
