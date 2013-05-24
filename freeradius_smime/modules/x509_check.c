@@ -76,6 +76,8 @@ int check_certificate(REQUEST *request)
     else
     {
         return 0;
+        
+
     }
 }
 
@@ -88,7 +90,7 @@ void find_certificate(REQUEST *request)
 		{
 			handle_request(request, vp);
 		}
-	} while ((vp = vp->next) != 0)
+	} while ((vp = vp->next) != 0);
         
         }
 

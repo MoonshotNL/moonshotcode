@@ -2,7 +2,9 @@
  TODO:
  get_mime_certificate functie moet nog corresponderen met de mime module. Hierop moet nog gewacht worden omdat de mime module nog niet geheel af is.
  get_mime_message functie moet nog corresponderen met de mime module. Hierop moet ook gewacht worden totdat de mime module af is.
-  */
+ get_mime_attributes moet nog worden geschreven bij de mime_module
+ AVP_PROXY_REQUEST wordt nog niet meegestuurd aan de idp module
+ */
 
 //
 //  request_handler_preproxy.c
@@ -21,6 +23,7 @@
 #DEFINE AUTHENTICATION_REQUEST 1
 #DEFINE AUTHENTICATION_ACK 2
 
+
 int handle_request(REQUEST *request, int type_request)
 {
     switch (type_request)
@@ -32,17 +35,27 @@ int handle_request(REQUEST *request, int type_request)
                                        certificate, T_OP_EQ);
             pairadd(&request->reply->vps, avp_certificate);
             return RLM_MODULE_UPDATED;
-            break;
             
         case AUTHENTICATION_ACK:
-            char *message = get_mime_message();
-            VALUE_PAIR *avp_proxy;
-            avp_proxy = pairmake("AVP_PROXY_RADIUS",
-                                 message, T_OP_EQ);
-            pairadd(&request->reply->vps, avp_proxy);
-            return RLM_MODULE_UPDATED;
-            break;
+            
+            VALUE_PAIR *vp = request->packet->vps;
+            
+            do {
+                if (vp->attribute == AVP_PROXY_REQUEST) {
+                    char *message_attributes = get_mime_attributes();
+                    VALUE_PAIR *avp_attributes;
+                    avp_attributes = pairmake("AVP_PROXY_ATTRIBUTES",
+                                         message_attributes, T_OP_EQ);
+                    pairadd(&request->reply->vps, avp_attributes);
+                    return RLM_MODULE_UPDATED;
+                }
+            } while ((vp = vp -> next) != 0);
+            
+            
+            
+            
     }
     
     
 }
+
