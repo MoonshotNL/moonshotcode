@@ -70,3 +70,7 @@ int unpack_mime_text(char *input, int len, char **output)
 	return output_len;
 }
 
+int pack_mime_cert(X509 **certlist, int cert_num, char **output)
+{
+	char *
+}
