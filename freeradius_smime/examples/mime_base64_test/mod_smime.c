@@ -3,10 +3,33 @@
 #include <stdio.h>
 #include <string.h>
 
-#define STR_MAXLEN		1024
+#define STR_MAXLEN				1024
+#define MIMEHEADER_TEXT_LEN		78
+#define MIMEHEADER_CERT_LEN		113
 
 #define STATE_HEADER	0
 #define STATE_BODY		1
+
+int mime_strip_header(int header_len, char *input, int input_len, char **output)
+{
+	char *outstring = malloc(input_len - header_len);
+	memcpy(outstring, input[header_len - 1], input_len - header_len);
+	*output = outstring;
+	return input_len - header_len;
+}
+
+X509 *obtain_X509_from_mime(char *in, int len)
+{
+	char *base64_cert = unpack_mime_cert(in, len);
+	char *der_cert;
+	int der_cert_len = base64_decode(base64_cert, strlen(base64_cert), &der_cert);
+
+	cert = d2i_X509(NULL, der_cert, der_cert_len);
+
+	free(der_cert);
+	free(base64_cert);
+	free(cert_body);
+}
 
 int pack_mime_text(char *input, int len, char **output)
 {
@@ -66,11 +89,37 @@ int unpack_mime_text(char *input, int len, char **output)
 	base64_buffer[base64_buffer_cur] = '\0';
 
 	output_len = base64_decode(base64_buffer, base64_buffer_cur, output);
-
+	free(base64_buffer);
 	return output_len;
 }
 
-int pack_mime_cert(X509 **certlist, int cert_num, char **output)
+int pack_mime_cert(X509 *certlist, char **output)
 {
-	char *
+	
+}
+
+int unpack_mime_cert(char *input, int len, X509 **cert)
+{
+	char *body_b64;
+	int body_b64_len;
+	char *body;
+	int body_len;
+	body_b64_len = mime_strip_header(MIMEHEADER_CERT_LEN, input, len, &body_b64);
+	if (!body_b64_len || !body_b64)
+	{
+		return -1;
+	}
+	
+	body_len = base64_decode(body_b64, body_b64_len, &body);
+	if (!body_len || !body)
+	{
+		return -1;
+	}
+	
+	*cert = d2i_X509(NULL, body, body_len);
+	if (!*cert)
+	{
+		return -1;
+	}
+	return 0;
 }
