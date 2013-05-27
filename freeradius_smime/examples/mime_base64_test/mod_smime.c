@@ -18,6 +18,14 @@ int mime_strip_header(int header_len, char *input, int input_len, char **output)
 	return input_len - header_len;
 }
 
+int mime_add_header_mimetext(char *input, int input_len, char **output)
+{
+	char *header = "Mime-version: 1.0\nContent-Type: text/plain\nContent-Transfer-Encoding: base64\n\n";
+	*output = malloc((sizeof(char) * input_len) + (sizeof(char) * MIMEHEADER_TEXT_LEN) + 1);
+	memcpy(*output, header, MIMEHEADER_TEXT_LEN * sizeof(char));
+	memcpy
+}
+
 X509 *obtain_X509_from_mime(char *in, int len)
 {
 	char *base64_cert = unpack_mime_cert(in, len);
@@ -93,7 +101,7 @@ int unpack_mime_text(char *input, int len, char **output)
 	return output_len;
 }
 
-int pack_mime_cert(X509 *certlist, char **output)
+int pack_mime_cert(X509 *cert, char **output)
 {
 	
 }
