@@ -18,6 +18,7 @@ static const CONF_PARSER module_config[] = {
   { "string",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,string), NULL,  NULL}, //zet de regels in de struct
     { "pub_key",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,pub_key), NULL,  NULL}, //zet de regels in de struct
     { "priv_key",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,priv_key), NULL,  NULL}, //zet de regels in de struct
+    //{ "is_idp",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,is_idp), NULL,  NULL},
   { NULL, -1, 0, NULL, NULL }		/* end the list */
 };
 
