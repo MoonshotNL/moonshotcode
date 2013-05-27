@@ -15,7 +15,9 @@ typedef struct rlm_moonshot_t {
 } rlm_moonshot_t;
 
 static const CONF_PARSER module_config[] = {
-  { "string",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,string), NULL,  NULL},
+  { "string",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,string), NULL,  NULL}, //zet de regels in de struct
+    { "pub_key",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,pub_key), NULL,  NULL}, //zet de regels in de struct
+    { "priv_key",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,priv_key), NULL,  NULL}, //zet de regels in de struct
   { NULL, -1, 0, NULL, NULL }		/* end the list */
 };
 
@@ -33,7 +35,7 @@ static int moonshot_init(CONF_SECTION *conf, void **instance)
 
 	//Parse the config file using conf, data and our parse rules in module_config
 	if (cf_section_parse(conf, data, module_config) < 0) {
-		free(data);
+		free(data); //rauwe data naar geformatte data
 		return -1;
 	}
 
