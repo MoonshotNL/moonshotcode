@@ -53,18 +53,8 @@ static int moonshot_preproxy(void *instance, REQUEST *request)
     
     /* found packet code http://technet.microsoft.com/en-us/library/cc958030.aspx */
     
-    //if the radius response is ACCEPT-REQUEST run the following
-    if (request->packet->code == PW_AUTHENTICATION_REQUEST)
-    {
-        handle_request(request, AUTHENTICATION_REQUEST);
-    }
-    
-    //if the radius response is ACCEPT-ACCEPT run the following
-    if (request->proxy->code == PW_AUTHENTICATION_ACK)
-    {
-        
-        handle_request(request, AUTHENTICATION_ACK);
-    }
+    //Handle pre-proxy requests.
+    handle_request(request);
 	
 	return RLM_MODULE_OK;
 }
