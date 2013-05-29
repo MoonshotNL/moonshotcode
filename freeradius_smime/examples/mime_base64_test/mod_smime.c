@@ -13,17 +13,29 @@
 int mime_strip_header(int header_len, char *input, int input_len, char **output)
 {
 	char *outstring = malloc(input_len - header_len);
-	memcpy(outstring, input[header_len - 1], input_len - header_len);
+	memcpy(outstring, input + header_len, input_len - header_len);
 	*output = outstring;
 	return input_len - header_len;
 }
 
-int mime_add_header_mimetext(char *input, int input_len, char **output)
+int mime_add_header_text(char *input, int input_len, char **output)
 {
 	char *header = "Mime-version: 1.0\nContent-Type: text/plain\nContent-Transfer-Encoding: base64\n\n";
 	*output = malloc((sizeof(char) * input_len) + (sizeof(char) * MIMEHEADER_TEXT_LEN) + 1);
 	memcpy(*output, header, MIMEHEADER_TEXT_LEN * sizeof(char));
-	memcpy
+	memcpy(*output + (MIMEHEADER_TEXT_LEN * sizeof(char)), input, input_len);
+	output[input_len + MIMEHEADER_TEXT_LEN] = '\0';
+	return input_len + MIMEHEADER_TEXT_LEN + 1;
+}
+
+int mime_add_header_cert(char *input, int input_len, char **output)
+{
+	char *header = "Mime-Version: 1.0\nContent-Type: application/pkcs7-mime; smime-type=certs-only\nContent-Transfer-Encoding: base64\n\n";
+	*output = malloc((sizeof(char) * input_len) + (sizeof(char) * MIMEHEADER_CERT_LEN) + 1);
+	memcpy(*output, header, MIMEHEADER_CERT_LEN * sizeof(char));
+	memcpy(*output + (MIMEHEADER_CERT_LEN * sizeof(char)), input, input_len);
+	output[input_len + MIMEHEADER_CERT_LEN] = '\0';
+	return input_len + MIMEHEADER_CERT_LEN + 1;
 }
 
 X509 *obtain_X509_from_mime(char *in, int len)

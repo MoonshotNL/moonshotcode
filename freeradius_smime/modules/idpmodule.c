@@ -114,7 +114,16 @@ ATTR_REQ_IN *parse_attr_req(char *input, int len)
 				{
 					item_tmp[item_cur] = '\0';
 					tmp_attr_req->required_attr_len = (int) strtol(item_tmp, NULL, 10);
-					state++;
+
+					if (tmp_attr_req->required_attr_len == 0)
+					{
+						state += 2;
+					}
+					else
+					{
+						state++;
+					}
+
 					input_cur++;
 					bzero(item_tmp, sizeof(char) * STR_MAXLEN);
 					item_cur = 0;
@@ -162,7 +171,16 @@ ATTR_REQ_IN *parse_attr_req(char *input, int len)
 				{
 					item_tmp[item_cur] = '\0';
 					tmp_attr_req->requested_attr_len = (int) strtol(item_tmp, NULL, 10);
-					state++;
+					
+					if (tmp_attr_req->required_attr_len == 0)
+					{
+						state += 2;
+					}
+					else
+					{
+						state++;
+					}
+
 					input_cur++;
 					bzero(item_tmp, sizeof(char) * STR_MAXLEN);
 					item_cur = 0;
