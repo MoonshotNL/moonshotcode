@@ -53,7 +53,7 @@ static int moonshot_preproxy(void *instance, REQUEST *request)
     
     /* found packet code http://technet.microsoft.com/en-us/library/cc958030.aspx */
     
-    //Handle pre-proxy requests.
+    //Handle pre-proxy requests, this is done by request_handler_preproxy.c
     handle_request(request);
 	
 	return RLM_MODULE_OK;
