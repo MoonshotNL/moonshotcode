@@ -17,9 +17,9 @@ typedef struct rlm_moonshot_t {
 } rlm_moonshot_t;
 
 static const CONF_PARSER module_config[] = {
-    { "pub_key",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,pub_key), NULL,  NULL}, //zet de regels in de struct
-    { "priv_key",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,priv_key), NULL,  NULL}, //zet de regels in de struct
-    { "priv_key_password",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,priv_key_password), NULL,  NULL}, //zet de regels in de struct
+    { "pub_key",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,pub_key), NULL,  NULL}, //holds location of the public certificate
+    { "priv_key",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,priv_key), NULL,  NULL}, //hols location of the private certificate
+    { "priv_key_password",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,priv_key_password), NULL,  NULL}, //holds the password of the private certificate
   { NULL, -1, 0, NULL, NULL }		/* end the list */
 };
 
