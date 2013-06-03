@@ -11,14 +11,15 @@ RCSID("$Id$")
 #DEFINE AUTHENTICATION_ACK 2  //ACCEPT-ACCEPT radius response
 
 typedef struct rlm_moonshot_t {
-	char		*string;
+	char		*pub_key;
+    char        *priv_key;
+    char        **priv_key_password;
 } rlm_moonshot_t;
 
 static const CONF_PARSER module_config[] = {
-  { "string",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,string), NULL,  NULL}, //zet de regels in de struct
     { "pub_key",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,pub_key), NULL,  NULL}, //zet de regels in de struct
     { "priv_key",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,priv_key), NULL,  NULL}, //zet de regels in de struct
-    //{ "is_idp",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,is_idp), NULL,  NULL},
+    { "priv_key_password",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,priv_key_password), NULL,  NULL}, //zet de regels in de struct
   { NULL, -1, 0, NULL, NULL }		/* end the list */
 };
 
