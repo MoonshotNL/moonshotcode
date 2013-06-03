@@ -1,10 +1,10 @@
-/*
+/**
 *The Attribute_Finder is used to find and/or extract Attribute/Value Pairs from a custom URN.
 *The structure of the URN = TIME:DN:SERVICE:REQUIRED-ATTRIBUTE-LENGTH:REQUIRED-ATTRIBUTE#1:REQUIRED-ATRIBUTE#N:REQUESTED-ATTRIBUTE-LENGTH:REQUESTED-ATTRIBUTE#1:REQUESTED-ATTRIBUTE#N
 *The idea is to cycle through all of this and then take out the amount of attributes (ATTRIBUTE_LENGTH) and the attributes themselves (ATTRIBUTE), plus their values (included in ATTRIBUTE, seperated with a '=' symbol).
 *This goes for both requested and required. But, while the REQUIRED attributes are known to us and included in the URN, the REQUESTED ones are not. Therefore, we should make a distinction between this and parse the required attributes like we normally do, but request the requested attributes from the VOMS server.
 *The result of this is then saved in a generic AttributeValuePair struct.
-*/
+**/
 #include <freeradius-devel/radiusd.h>
 #include <freeradius-devel/radius.h>
 #include <freeradius-devel/modules.h>
@@ -19,35 +19,41 @@
 #define STATE_REQUESTEDATTRIBUTEVALUEPAIR   3 //Working with a requested AVP
 
 #define URN_OFFSET                  3 //The offset tells us how at what part of the URN we should look. The data starts to become relevant AFTER the third point of data, which is the ServiceDomainName. The RequiredAttributeLength following that is what we are interested in.
-#define AVP_MAX                     30
 
+/**
+*It is possible to differentiate between required and requested attributes by inserting a boolean in the struct, but this does not happen.
+**/
 typedef struct generic_attribute_value_pair {
     char *attribute;
 	char *value;
 } GENERIC_AVP;
 
-//Function returns an 'array' of all attribute/value pairs. Basically cycle through the URN, extract each AVP, and add it to the array.
+/**
+*'Main' method of this module. By feeding this a URN, it will return a pointer with all AVPs it found.
+**/
 GENERIC_AVP *find_all_attributevalue_pairs(char *urn){
-    //Create an array of AVPs of both types.
     GENERIC_AVP *attribute_value_pair;
-    *attribute_value_pair = cycle_urn();
+    int len = 0; //The length of our URN, though we do not know it yet.
+    int tmp_cur = 0; //We use this to find out the length of our URN
+    while(urn[tmp_cur] != '\0'){
+        len++;
+    }
+    *attribute_value_pair = cycle_urn(urn, len);
     return attribute_value_pair;
 }
 
-/*
+/**
 *This function is fed a URN, and will then cycle thorugh it.
 *The first three values (as seen in the offset we defined above) will be ignored.
-*
-*It returns a
-*/
-GENERIC_AVP *cycle_urn(char *urn){
-    //Scroll through URN until you find the required data point (REQUIRED-ATTRIBUTE-LENGTH, the fourth one, so after three separators).
-
+*After that it will expect to find an integer defining the amount of required attributes to parse.
+*It will use an outside method to parse those, and afterwards expect to find an integer defining the amount of requested attributes to parse.
+*It will use the same outside method as above to parse those, and then return a multitude of AVPs with all the AVPs we found.
+**/
+GENERIC_AVP *cycle_urn(char *urn, int len){
     GENERIC_AVP *gen_avp = rad_malloc(sizeof(GENERIC_AVP)); //An array of AVPs. We will fill this and return this as output.
 
 	int input_cur = 0; //We start at the beginning of the URN, at posizion zero
 	int item_cur = 0; //The current position ('cursor') of the temporary item we are writing to.
-    //int item_len = 0; //The length of the string we found
 	int item_p = 0; //Amount of items we parsed. We use this to track whether or not we have arrived at the relevant parts yet.
 	int required_attr_p = 0; //Required attributes we parsed so far
 	int requested_attr_p = 0; //Requested attributes we parsed so far
@@ -59,9 +65,9 @@ GENERIC_AVP *cycle_urn(char *urn){
 
 	int state = STATE_IRRELEVANT; //When we first start working our way through the URN, the first points of data are all irrelevant to us.
 
-	while(input_cur < sizeof(urn)) //Do not know if this works yet, my itnernet is gone. Check when I have access again.
+	while(input_cur <= len) //Do not know if this works yet, my itnernet is gone. Check when I have access again.
 	{
-		switch (state) //A switch for every (attribute? data? What is the correct term?) in our URN.
+		switch (state) //This switch will react to the states defined at the top of this file
 		{
         case STATE_IRRELEVANT:
             if(urn[input_cur] != ':'){ //As long as we do not find a seperator, we move on in this stage.
@@ -82,7 +88,7 @@ GENERIC_AVP *cycle_urn(char *urn){
                 break;
             } else {
                 item_tmp[item_cur] = '\0'; //We insert a null-terminator since we're at the end of the string
-            if(item_p == URN_OFFSET){ //If the amount of items parsed is still only as big as the offset, it means we are at REQUIRED_ATTRIBUTE_LENGTH
+                if(item_p == URN_OFFSET){ //If the amount of items parsed is still only as big as the offset, it means we are at REQUIRED_ATTRIBUTE_LENGTH
                     required_length = (int) strtol(item_tmp, NULL, 10); //The string gets converted to a long, and then parsed to an int
 					state = STATE_REQUIREDATTRIBUTEVALUEPAIR; //In the next loop, we will parse the required AVPs
 				} else { //If the amount of items parsed is bigger, we have arrived at REQUESTED_ATTRIBUTE_LENGTH
@@ -130,15 +136,15 @@ GENERIC_AVP *cycle_urn(char *urn){
                 }
             }
             break;
-        case default:
-            //Something must have gone terribly wrong to arrive here.
-            //Do some error-handling here if there is time left.
-            break;
-		}
+        }
 	}
     return gen_avp;
 }
 
+/**
+*This method is used to obtain an AttributeValue pair from a 'raw' string. Meaning, the value and attribute are still seperated by a '=' sign, provided the value is even known.
+*A boolean will tell the method whether or not we should expect the value to be there (is_required implies that it should be there, and vice versa).
+**/
 AVP extract_valuepair(char *raw_valuepair, bool is_required){
     GENERIC_AVP tmp_avp; //Temporary AVP
 
@@ -150,8 +156,8 @@ AVP extract_valuepair(char *raw_valuepair, bool is_required){
     if(parsing_attributename){ //We perform a check to see if we are still parsing an attributename, or a value
         if (raw_valuepair[input_cur] == '='){ //If we have arrived at a seperation for the attribute to the value...
             item_tmp[item_cur] = '\0'; //We take the temporary item (tmp_attr_req), and place our current 'findings' in it. We forget about the "=", but we DO insert a null terminator. Basically treat this as if we found a separator
-            tmp_avp->attribute = rad_malloc(sizeof(char) * (item_cur + 1)); //The temporary request gets a size equal to the amount of characters we currently have, plus one spot for the null terminator
-            memcpy(tmp_avp->attribute, item_tmp, sizeof(char) * (item_cur + 1)); //Memoryblock is copied from temporary tp our temporary struct
+            tmp_avp->attribute = rad_malloc(sizeof(char) * (item_cur + 1)); //The temporary AVP Attribute gets a size equal to the amount of characters we currently have, plus one spot for the null terminator
+            memcpy(tmp_avp->attribute, item_tmp, sizeof(char) * (item_cur + 1)); //Memoryblock is copied from temporary tp our temporary AVP
             input_cur++;
             bzero(item_tmp, sizeof(char) * STR_MAXLEN); //We will also clear our current temporary storage so we can start storing the value instead
             item_cur = 0; //We REset the item_cur and shift up the input_cur by one
