@@ -253,6 +253,7 @@ ATTR_REQ_IN *parse_attr_req(char *input, int len) //Input is our URN and it's le
 	return tmp_attr_req;
 }
 
+/*
 void handle_client_request(){
     VALUE_PAIR *vp = request->packet->vps;
 	do
@@ -263,7 +264,7 @@ void handle_client_request(){
 		}
 	} while ((vp = vp->next) != 0)
 }
-
+*/
 void handle_requests_idp(REQUEST *request)
 {
 	VALUE_PAIR *vp = request->packet->vps;
