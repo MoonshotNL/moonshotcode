@@ -1,4 +1,7 @@
 #include "crypto/mod_base64.h"
+#include <openssl/pem.h>
+#include <openssl/cms.h>
+#include <openssl/err.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -9,6 +12,10 @@
 
 #define STATE_HEADER	0
 #define STATE_BODY		1
+
+#define MAX_MSGLEN	4096
+
+
 
 int mime_strip_header(int header_len, char *input, int input_len, char **output)
 {
@@ -146,4 +153,102 @@ int unpack_mime_cert(char *input, int len, X509 **cert)
 	}
 	
 	return 0;
+}
+
+char *pack_smime_text(char *input, X509 *pubcert)
+{
+	STACK_OF(X509) *recips = NULL;
+	CMS_ContentInfo *cms_sig = NULL, *cms_enc = NULL;
+	BIO *bio_in = NULL, *bio_sig = NULL, *bio_out = NULL;
+	BUF_MEM *bptr;
+	char *output = NULL;
+	int flags = CMS_STREAM;
+
+	//Prepare general stuff
+	OpenSSL_add_all_algorithms();
+
+	recips = sk_X509_new_null();
+	if (!recips || !sk_X509_push(recips, pubcert))
+	{
+		printf("recips || sk_X509_push error\n");
+		exit(1);
+	}
+	pubcert = NULL;
+
+	bio_in = BIO_new_mem_buf(input, -1);
+	bio_sig = BIO_new(BIO_s_mem());
+	bio_out = BIO_new(BIO_s_mem());
+
+	if (!bio_in || !bio_sig || !bio_out)
+	{
+		printf("bio_in || bio_sig || bio_out error\n");
+		exit(1);
+	}
+
+	cms_sig = CMS_sign(pubcert,) //TODO In progress of adding signing
+
+	cms = CMS_encrypt(recips, bio_in, EVP_des_ede3_cbc(), flags);
+
+	if (!cms)
+	{
+		printf("cms error\n");
+		exit(1);
+	}
+
+	if (!SMIME_write_CMS(bio_out, cms, bio_in, flags))
+	{
+		printf("SMIME write error\n");
+		exit(1);
+	}
+
+	BIO_get_mem_ptr(bio_out, &bptr);
+	output = bptr->data;
+	output = strndup(bptr->data, bptr->length);
+
+	CMS_ContentInfo_free(cms);
+	BIO_free(bio_in);
+	BIO_free(bio_out);	
+
+	return output;
+}
+
+char *unpack_smime_text(char *input, EVP_PKEY *pkey, X509 *cert)
+{
+	BIO *bio_in = NULL, *bio_out = NULL;
+	CMS_ContentInfo *cms = NULL;
+	char *output = NULL;
+	BUF_MEM *bptr = NULL;
+
+	OpenSSL_add_all_algorithms();
+
+	bio_in = BIO_new_mem_buf(input, -1);
+	bio_out = BIO_new(BIO_s_mem());
+
+	if (!bio_in || !bio_out)
+	{
+		printf("dectext: error creating bio_in or bio_out\n");
+		exit(1);
+	}
+	
+	cms = SMIME_read_CMS(bio_in, NULL);
+	if (!cms)
+	{
+		printf("Error parsing message to CMS\n");
+		exit(1);
+	}
+
+	if (!CMS_decrypt(cms, pkey, cert, NULL, bio_out, 0))
+	{
+		printf("Error decrypting message\n");
+		exit(1);
+	}
+
+	BIO_get_mem_ptr(bio_out, &bptr);
+	output = strndup(bptr->data, bptr->length);
+
+	CMS_ContentInfo_free(cms);
+   BIO_free(bio_in);
+   BIO_free(bio_out);
+
+	return output;
 }
