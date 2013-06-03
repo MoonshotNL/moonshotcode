@@ -23,12 +23,12 @@
 
 
 
-int handle_request(REQUEST *request)
+int proxy_handle_request(REQUEST *request)
 {
     switch (request->packet->code) //it's allowed to handle multiple requests, the request type is based on radius responses
     {
         case PW_AUTHENTICATION_REQUEST:
-            char *certificate = get_mime_certificate();
+            char *certificate = pack_mime_cert();
             VALUE_PAIR *avp_certificate;
             avp_certificate = pairmake("AVP_CERTIFICATE_RADIUS",
                                        certificate, T_OP_EQ); //AVP_CERTIFICATE_RADIUS is an AVP that stores the certificate chain
@@ -40,7 +40,7 @@ int handle_request(REQUEST *request)
             VALUE_PAIR *vp = request->packet->vps;
             
             do {
-                if (vp->attribute == PW_AUTHENTICATION_ACK) //detect if AVP_PROXY_REQUEST is sent by the idp module
+                if (vp->attribute == AVP_PROXY_REQUEST) //detect if AVP_PROXY_REQUEST is sent by the idp module
                 {
                     char *message_attributes = get_mime_attributes();
                     VALUE_PAIR *avp_attributes;

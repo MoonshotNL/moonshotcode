@@ -11,14 +11,38 @@ AVP_PROXY_REQUEST wordt nog niet meegestuurd aan de idp module
 x509_check.c:
 Lijst maken waarin elke CA wordt afgegaan totdat we de juiste hebben. handle_request nog niet af, komt doordat de mime module eerst af moet
 
-Wouter:
-rlm_moonshot.c
-Config file parsen en bedenken hoe de configuratie file van ons uit wordt gelezen.
+request_handler_preproxy.c:
+get_mime_attributes, functie bestaat nog niet
+AVP_PROXY_REQUEST, AVP wordt nergens aangemaakt
 
-Sebastiaan:
-Werken aan de mime module
+idpmodule.c:
+line 323: ATTR_SMIME_REQUEST, waar wordt dit aangemaakt
+line 338: mime_unpack_attrrequest functie bestaat nog niet
+line 340 en 346: been error return
+line 345: get_matching_certificate, functie bestaat nog niet
 
-Marvin:
-Verder aan de parser van de proxy
+x509_mod.c:
+functie wordt niet gebruikt
 
-Deadline: maandag 27 mei 2013
+x509_check.c:
+functie wordt niet gebruikt
+Lijst maken waarin elke CA wordt afgegaan totdat we de juiste hebben.
+handle_request nog niet af, komt doordat de mime module eerst af moet
+handle_request functie wordt gebruikt
+
+proxymodule.c:
+functies worden nog niet gebruikt
+line 282: functienaam is al in gebruik
+line 268: handle_requests_idp juiste naam?
+line 275: functienaam dubbel
+line 289: mime_unpack_attrrequest functie bestaat niet
+line 296: get_matching_certificate functie bestaat niet
+line 302: create_output_request functie bestaat niet
+
+mod_smime.c:
+line 222: begint met een hoofdletter klopt dat
+worden certificaten al geladen?
+
+attribute_finder.c:
+line 187: request_value_by_attribute functie bestaat nog niet
+

@@ -13,7 +13,7 @@ RCSID("$Id$")
 typedef struct rlm_moonshot_t {
 	char		*pub_key;
     char        *priv_key;
-    char        **priv_key_password;
+    char        *priv_key_password;
 } rlm_moonshot_t;
 
 static const CONF_PARSER module_config[] = {
