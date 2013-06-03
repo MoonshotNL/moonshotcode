@@ -1,9 +1,9 @@
 /*
 *The Attribute_Finder is used to find and/or extract Attribute/Value Pairs from a custom URN.
 *The structure of the URN = TIME:DN:SERVICE:REQUIRED-ATTRIBUTE-LENGTH:REQUIRED-ATTRIBUTE#1:REQUIRED-ATRIBUTE#N:REQUESTED-ATTRIBUTE-LENGTH:REQUESTED-ATTRIBUTE#1:REQUESTED-ATTRIBUTE#N
-*The idea is to cycle through all of this and then take out the amount of attributes (ATTRIBUTE_LENGTH) and the attributes themselves (ATTRIBUTE).
-*This goes for both requested and required. Pay attention to attributes we do not yet know, and attributes we can expect zero of.
-*Extracted attributes should then be saved in such a way they can later be requested from the VOMS server, or included in a function that will make a URN for us.
+*The idea is to cycle through all of this and then take out the amount of attributes (ATTRIBUTE_LENGTH) and the attributes themselves (ATTRIBUTE), plus their values (included in ATTRIBUTE, seperated with a '=' symbol).
+*This goes for both requested and required. But, while the REQUIRED attributes are known to us and included in the URN, the REQUESTED ones are not. Therefore, we should make a distinction between this and parse the required attributes like we normally do, but request the requested attributes from the VOMS server.
+*The result of this is then saved in a generic AttributeValuePair struct.
 */
 #include <freeradius-devel/radiusd.h>
 #include <freeradius-devel/radius.h>
@@ -18,7 +18,8 @@
 #define STATE_REQUIREDATTRIBUTEVALUEPAIR    2 //Working with a required AVP
 #define STATE_REQUESTEDATTRIBUTEVALUEPAIR   3 //Working with a requested AVP
 
-#define URN_OFFSET                  3 //The offset tells us how at what part of the URN we should look. The data starts to become relevant after the third point of data, which is the amount off attribute we can expect.
+#define URN_OFFSET                  3 //The offset tells us how at what part of the URN we should look. The data starts to become relevant AFTER the third point of data, which is the ServiceDomainName. The RequiredAttributeLength following that is what we are interested in.
+#define AVP_MAX                     30
 
 typedef struct generic_attribute_value_pair {
     char *attribute;
@@ -26,18 +27,19 @@ typedef struct generic_attribute_value_pair {
 } GENERIC_AVP;
 
 //Function returns an 'array' of all attribute/value pairs. Basically cycle through the URN, extract each AVP, and add it to the array.
-AVP **find_all_attributevalue_pairs(char *urn){
+GENERIC_AVP *find_all_attributevalue_pairs(char *urn){
     //Create an array of AVPs of both types.
     GENERIC_AVP *attribute_value_pair;
     *attribute_value_pair = cycle_urn();
     return attribute_value_pair;
 }
 
-//required zijn er, requested niet
-//required parse je gewoon
-//requested sla je de attributenames van op
-//dan gebeurt er magic en worden de values erbij gezet
-
+/*
+*This function is fed a URN, and will then cycle thorugh it.
+*The first three values (as seen in the offset we defined above) will be ignored.
+*
+*It returns a
+*/
 GENERIC_AVP *cycle_urn(char *urn){
     //Scroll through URN until you find the required data point (REQUIRED-ATTRIBUTE-LENGTH, the fourth one, so after three separators).
 
@@ -145,47 +147,49 @@ AVP extract_valuepair(char *raw_valuepair, bool is_required){
     char item_tmp[STR_MAXLEN]; //Temporary item
     int item_cur = 0; //Item cursor
 
-    if(is_required){ //If our AVP is required, it means both the attributename and vlaue are in there already
-        if (raw_valuepair[input_cur] >= sizeof(raw_valuepair)) //A separator means we should have seen both our attributename and value by now
-				{ //So in this part, the data is inserted in our struct
-					item_tmp[item_cur] = '\0'; //The value still needs to be saved in our temporary file first, so we add a null terminator here as well
+    if(parsing_attributename){ //We perform a check to see if we are still parsing an attributename, or a value
+        if (raw_valuepair[input_cur] == '='){ //If we have arrived at a seperation for the attribute to the value...
+            item_tmp[item_cur] = '\0'; //We take the temporary item (tmp_attr_req), and place our current 'findings' in it. We forget about the "=", but we DO insert a null terminator. Basically treat this as if we found a separator
+            tmp_avp->attribute = rad_malloc(sizeof(char) * (item_cur + 1)); //The temporary request gets a size equal to the amount of characters we currently have, plus one spot for the null terminator
+            memcpy(tmp_avp->attribute, item_tmp, sizeof(char) * (item_cur + 1)); //Memoryblock is copied from temporary tp our temporary struct
+            input_cur++;
+            bzero(item_tmp, sizeof(char) * STR_MAXLEN); //We will also clear our current temporary storage so we can start storing the value instead
+            item_cur = 0; //We REset the item_cur and shift up the input_cur by one
+            parsing_attributename != parsing_attributename; //We set the parsing_attributename value to false so during the next loop we are parsing the value
+            break; //We then break off the loop, since we did what we wanted with the current character
+         } else {
+            item_tmp[item_cur] = raw_valuepair[input_cur];//We take the temporary string and place our current character in it.
+            item_cur++; //Item_cur and input_cur shift up by one, and a break. Pretty standard stuff.
+            input_cur++;
+            break;
+        }
+    } else {
+        if(is_required){//If our AVP is required, it means both the attributename and vlaue are in there already
+            if (raw_valuepair[input_cur] >= sizeof(raw_valuepair)){ //If we have arrived at the end of the input, it means we can now insert the value.
+                    item_tmp[item_cur] = '\0'; //The value still needs to be saved in our temporary file first, so we add a null terminator here as well
                     tmp_avp->value = rad_malloc(sizeof(char) * (item_cur + 1)); //The temporary request gets a size equal to the amount of characters we currently have, plus one spot for the null terminator
                     memcpy(tmp_avp->value, item_tmp, sizeof(char) * (item_cur + 1)); //Memoryblock is copied from temporary tp our temporary struct
                     input_cur++;
                     bzero(item_tmp, sizeof(char) * STR_MAXLEN); //We will also clear our current temporary storage so we can start storing an attributename again
                     item_cur = 0; //We REset the item_cur and shift up the input_cur by one
                     parsing_attributename != parsing_attributename; //We set the parsing_attributename value to true so during the next loop we are parsing an attributename again
-					bzero(item_tmp, sizeof(char) * STR_MAXLEN);
-					break;
-				}
-				//Here we are out of the separator zone. Basically, parsing code goes in this block*****
-
-				if(parsing_attributename){ //We perform a check to see if we are still parsing an attributename, or a value
-                    if (raw_valuepair[input_cur] == '='){ //If we have arrived at a seperation for the attribute to the value...
-                        item_tmp[item_cur] = '\0'; //We take the temporary item (tmp_attr_req), and place our current 'findings' in it. We forget about the "=", but we DO insert a null terminator. Basically treat this as if we found a separator
-                        tmp_attr_req->required_attr[attr_p]->attribute = rad_malloc(sizeof(char) * (item_cur + 1)); //The temporary request gets a size equal to the amount of characters we currently have, plus one spot for the null terminator
-                        memcpy(tmp_attr_req->required_attr[attr_p]->attribute, item_tmp, sizeof(char) * (item_cur + 1)); //Memoryblock is copied from temporary tp our temporary struct
-                        //The AVP struct currently does not use the string lengths, so they are not set. If you would like to set them, THIS is the place.
-                        input_cur++;
-                        bzero(item_tmp, sizeof(char) * STR_MAXLEN); //We will also clear our current temporary storage so we can start storing the value instead
-                        item_cur = 0; //We REset the item_cur and shift up the input_cur by one
-                        parsing_attributename != parsing_attributename; //We set the parsing_attributename value to false so during the next loop we are parsing the value
-                        break; //We then break off the loop, since we did what we wanted with the current character
-                     } else {
-                        item_tmp[item_cur] = raw_valuepair[input_cur];//We take the temporary string and place our current character in it.
-                        item_cur++; //Item_cur and input_cur shift up by one, and a break. Pretty standard stuff.
-                        input_cur++;
-                        break;
-                    }
-				} else {
-				    item_tmp[item_cur] = input[input_cur];//We take the temporary string and place our current character in it.
-                    item_cur++; //Item_cur and input_cur shift up by one, and a break. Pretty standard stuff.
-                    input_cur++;
+                    bzero(item_tmp, sizeof(char) * STR_MAXLEN);
                     break;
-                }
-				break;
-    } else { //If it is not required, it is requested. This means we DO have the attributename, but not the value. That value is found here.
-        //!MAGIC!
+            } else {
+                item_tmp[item_cur] = raw_valuepair[input_cur];//We take the temporary string and place our current character in it.
+                item_cur++; //Item_cur and input_cur shift up by one, and a break. Pretty standard stuff.
+                input_cur++;
+                break;
+            }
+        } else { //If it is not a required attributevalue pair, it must requested. This means we DO have the attributename, but not the value. That value is found here.
+            //!MAGIC!
+            //This method (request_value_by_attribute() ) does NOT yet exist. The idea is to have a method that returns a char* representing the requested value, input being a char* representing the requested attribute
+            item_tmp = request_value_by_attribute(tmp_avp->attribute);
+            tmp_avp->value = rad_malloc(sizeof(item_tmp));
+            memcpy(tmp_avp->value, item_tmp, sizeof(char) * (item_cur + 1));
+            bzero(item_tmp, sizeof(char) * STR_MAXLEN);
+            break;
+        }
     }
     return tmp_avp; //It should not get to this part, but checking for null-returns where this function is used should make it less prone to break.
 }
