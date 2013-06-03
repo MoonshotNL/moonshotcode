@@ -15,12 +15,46 @@
 X509 *read__public_certificate(void *instance)
 {
     BIO *tbio = NULL;
-    rlm_testing_t *data = (rlm_testing_t *)instance;
-    char *cert = data->pub_key;
+    X509 *certificate;
+    char *cert;
+    rlm_testing_t *data;
+    
+    data = (rlm_testing_t *)instance;
+    cert = data->pub_key;
     tbio = BIO_new_file(cert, "r");
     
-    X509 *certificate;
     certificate = PEM_read_bio_X509(tbio, NULL, 0, NULL);
 	
+    if(!*certificate)
+    {
+        return NULL;
+    }
+    
+    return certificate;
+}
+
+X509 *read_private_certificate(void *instance)
+{
+    BIO *tbio = NULL;
+    X509 *certificate;
+    char *cert;
+    char *password;
+    rlm_testing_t *data;
+    int size;
+    
+    data = (rlm_testing_t *)instance;
+    cert = data->priv_key;
+    password = data->priv_key_password;
+    //size password_size = strlen(password);
+    
+    tbio = BIO_new_file(cert, "r");
+    
+    certificate = PEM_read_bio_X509(tbio, NULL, null, password);
+	
+    if(!*certificate)
+    {
+        return NULL;
+    }
+    
     return certificate;
 }
