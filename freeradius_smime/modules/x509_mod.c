@@ -9,19 +9,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <openssl/bio.h>
+#include <openssl/x509.h>
 
-x509 &read__public_certificate(void *instance)
+X509 *read__public_certificate(void *instance)
 {
     BIO *tbio = NULL;
-    rlm_testing_T *data = instance;
+    rlm_testing_t *data = (rlm_testing_t *)instance;
     char *cert = data->pub_key;
     tbio = BIO_new_file(cert, "r");
     
-    BIO *bio = NULL;
-    bio = BIO_new_mem_buf(tbio);
-    
     X509 *certificate;
-    certificate = PEM_read_bio_X509(bio, tbio, 0, NULL);
-    
+    certificate = PEM_read_bio_X509(tbio, NULL, 0, NULL);
+	
     return certificate;
 }
