@@ -48,13 +48,10 @@ static int moonshot_preproxy(void *instance, REQUEST *request)
 {
 	/* quiet the compiler */
 	instance = instance;
-	request = request;
-    
-    /* found packet code http://technet.microsoft.com/en-us/library/cc958030.aspx */
-    
+
     //Handle pre-proxy requests, this is done by request_handler_preproxy.c
     proxy_handle_request(request);
-	
+
 	return RLM_MODULE_OK;
 }
 
@@ -62,8 +59,8 @@ static int moonshot_postauth(void *instance, REQUEST *request)
 {
 	/* quiet the compiler */
 	instance = instance;
-	request = request;
 
+	//Is it an Access-Accept?
 	if (request->reply->code == PW_AUTHENTICATION_ACK)
 	{
 		idp_handle_requests(request);
