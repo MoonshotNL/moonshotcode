@@ -253,33 +253,32 @@ ATTR_REQ_IN *parse_attr_req(char *input, int len) //Input is our URN and it's le
 	return tmp_attr_req;
 }
 
-/*
-void handle_client_request(){
+void proxy_handle_requests_client(){
     VALUE_PAIR *vp = request->packet->vps;
 	do
 	{
 		if (vp->attribute == ATTR_SMIME_REQUEST)
 		{
-			handle_request(request, vp);
+			proxy_handle_request(request, vp);
 		}
 	} while ((vp = vp->next) != 0)
 }
-*/
-void handle_requests_idp(REQUEST *request)
+
+void proxy_handle_requests_idp(REQUEST *request)
 {
 	VALUE_PAIR *vp = request->packet->vps;
 	do
 	{
 		if (vp->attribute == ATTR_SMIME_REQUEST)
 		{
-			handle_request(request, vp);
+			proxy_handle_request(request, vp);
 		} else if (vp->attribute == ATTR_SMIME_REQUEST){
 
 		}
 	} while ((vp = vp->next) != 0)
 }
 
-void handle_request(REQUEST *request, VALUE_PAIR *vp)
+void proxy_handle_request(REQUEST *request, VALUE_PAIR *vp)
 {
 	char *input_data;
 	int input_len;
