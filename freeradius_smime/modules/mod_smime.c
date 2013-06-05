@@ -225,10 +225,9 @@ char *pack_smime_text(char *input, EVP_PKEY *pkey, X509 *pubcert)
    return output;
 }
 
-
 char *unpack_smime_text(char *input, EVP_PKEY *pkey, X509 *cert)
 {
-	BIO *bio_in = NULL, *bio_out = NULL;
+	BIO *bio_in = NULL, *bio_dec = NULL, *bio_out = NULL;
 	CMS_ContentInfo *cms = NULL;
 	char *output = NULL;
 	BUF_MEM *bptr = NULL;
@@ -236,11 +235,12 @@ char *unpack_smime_text(char *input, EVP_PKEY *pkey, X509 *cert)
 	OpenSSL_add_all_algorithms();
 
 	bio_in = BIO_new_mem_buf(input, -1);
+	bio_dec = BIO_new(BIO_s_mem());
 	bio_out = BIO_new(BIO_s_mem());
 
-	if (!bio_in || !bio_out)
+	if (!bio_in || !bio_dec || !bio_out)
 	{
-		printf("dectext: error creating bio_in or bio_out\n");
+		printf("dectext: error creating bio_in, bio_dec or bio_out\n");
 		exit(1);
 	}
 	

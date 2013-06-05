@@ -20,7 +20,7 @@
 
 #include "common.h"
 #include "mod_mime.h"
-
+#include "mod_x509.h"
 
 
 int proxy_handle_request(REQUEST *request)
@@ -28,10 +28,11 @@ int proxy_handle_request(REQUEST *request)
     switch (request->packet->code) //it's allowed to handle multiple requests, the request type is based on radius responses
     {
         case PW_AUTHENTICATION_REQUEST:
-            char *certificate = pack_mime_cert();
+			char *cert_message;
+            pack_mime_cert(public_cert, &cert_message)
             VALUE_PAIR *avp_certificate;
             avp_certificate = pairmake("AVP_CERTIFICATE_RADIUS",
-                                       certificate, T_OP_EQ); //AVP_CERTIFICATE_RADIUS is an AVP that stores the certificate chain
+                                       cert_message, T_OP_EQ); //AVP_CERTIFICATE_RADIUS is an AVP that stores the certificate chain
             pairadd(&request->reply->vps, avp_certificate); //add AVP
             return RLM_MODULE_UPDATED;                      //we are basically saying that our AVPs are updated
             
@@ -42,7 +43,8 @@ int proxy_handle_request(REQUEST *request)
             do {
                 if (vp->attribute == AVP_PROXY_REQUEST) //detect if AVP_PROXY_REQUEST is sent by the idp module
                 {
-                    char *message_attributes = get_mime_attributes();
+                    char *message_attributes = unpack_smime_text(vp->data.octets, private_key, public_cert);
+					char *out_message = obtain_attributes(message_attributes);
                     VALUE_PAIR *avp_attributes;
                     avp_attributes = pairmake("AVP_PROXY_ATTRIBUTES",
                                          message_attributes, T_OP_EQ); //AVP_PROXY_ATTRIBUTES is an AVP that stores the attributes
