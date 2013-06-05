@@ -45,7 +45,7 @@ typedef struct attr_req_out
 	char **requested_attr;
 } ATTR_REQ_OUT;
 
-ATTR_REQ_IN *parse_attr_req(char *input, int len)
+static ATTR_REQ_IN *parse_attr_req(char *input, int len)
 {
    ATTR_REQ_IN *tmp_attr_req = rad_malloc(sizeof(ATTR_REQ_IN));
    int input_cur = 0;
@@ -229,7 +229,7 @@ ATTR_REQ_IN *parse_attr_req(char *input, int len)
    return tmp_attr_req;
 }
 
-AVP *get_avps_by_attributes(char **attributes, int length)
+static AVP *get_avps_by_attributes(char **attributes, int length)
 {
    //This function is to be implemented for the IDPs auathentication backend
    AVP *avp_list;
@@ -257,7 +257,7 @@ AVP *get_avps_by_attributes(char **attributes, int length)
    return avp_list;
 }
 
-ATTR_REQ_OUT *get_attr_req_out(ATTR_REQ_IN *input)
+static ATTR_REQ_OUT *get_attr_req_out(ATTR_REQ_IN *input)
 {
    ATTR_REQ_OUT *outstruct;
    AVP *pairs;
@@ -281,7 +281,7 @@ ATTR_REQ_OUT *get_attr_req_out(ATTR_REQ_IN *input)
    return outstruct;
 }
 
-int attr_req_out_to_string(ATTR_REQ_OUT *input, char **output)
+static int attr_req_out_to_string(ATTR_REQ_OUT *input, char **output)
 {
    char buffer[STR_MAXLEN];
    int i;
@@ -307,7 +307,7 @@ int attr_req_out_to_string(ATTR_REQ_OUT *input, char **output)
    return strlen(*output);
 }
 
-X509 *get_matching_certificate(REQUEST *request, char *dn)
+static X509 *get_matching_certificate(REQUEST *request, char *dn)
 {
 	char *base64_cert;
 	BIO *bio;
@@ -351,19 +351,7 @@ X509 *get_matching_certificate(REQUEST *request, char *dn)
 	return NULL;
 }
 
-void idp_handle_requests(REQUEST *request)
-{
-	VALUE_PAIR *vp = request->packet->vps;
-	do
-	{
-		if (vp->attribute == ATTR_SMIME_REQUEST)
-		{
-			handle_request(request, vp);
-		}
-	} while ((vp = vp->next) != 0)
-}
-
-void handle_request(REQUEST *request, VALUE_PAIR *vp)
+static void handle_request(REQUEST *request, VALUE_PAIR *vp)
 {
 	char *input_data;
 	int input_len;
@@ -392,4 +380,16 @@ void handle_request(REQUEST *request, VALUE_PAIR *vp)
 	VALUE_PAIR *avp_smime = pairmake("AVP_PROXYREQUEST_MOONSHOT",smime_msg, T_OP_EQ);
 	pairadd(&request->reply->vps, avp_smime);
 	return;
+}
+
+void idp_handle_requests(REQUEST *request)
+{
+	VALUE_PAIR *vp = request->packet->vps;
+	do
+	{
+		if (vp->attribute == ATTR_SMIME_REQUEST)
+		{
+			handle_request(request, vp);
+		}
+	} while ((vp = vp->next) != 0)
 }
