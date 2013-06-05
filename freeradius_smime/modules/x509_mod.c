@@ -25,11 +25,10 @@ X509 *private_certificate;
  
  */
 
-X509 *read_public_certificate(void *instance)
+int read_public_certificate(void *instance)
 {
     BIO *tbio = NULL;
-    public_certificate = malloc(sizeof(X509));
-    public_certificate = calloc(sizeof(X509));
+    public_certificate = calloc(1, sizeof(X509));
     char *cert;
     rlm_testing_t *data;
     
@@ -41,10 +40,10 @@ X509 *read_public_certificate(void *instance)
 	
     if(!public_certificate)
     {
-        return NULL;
+        return -1;
     }
     
-    return public_certificate;
+    return 0;
 }
 
 /*
@@ -59,11 +58,10 @@ X509 *read_public_certificate(void *instance)
  
  */
 
-X509 *read_private_certificate(void *instance)
+int read_private_certificate(void *instance)
 {
     BIO *tbio = NULL;
-    private_certificate = malloc(sizeof(X509));
-    private_certificate = calloc(sizeof(X509));
+    private_certificate = calloc(1, sizeof(X509));
     char *cert;
     char *password;
     rlm_testing_t *data;
@@ -79,8 +77,8 @@ X509 *read_private_certificate(void *instance)
 	
     if(!private_certificate)
     {
-        return NULL;
+        return -1;
     }
     
-    return private_certificate;
+    return 0;
 }
