@@ -42,6 +42,9 @@ static int moonshot_init(CONF_SECTION *conf, void **instance)
 	}
 
 	*instance = data;
+    
+    read_public_certificate(instance);
+    read_private_certificate(instance);
 
 	return 0;
 }
@@ -55,7 +58,7 @@ static int moonshot_preproxy(void *instance, REQUEST *request)
     /* found packet code http://technet.microsoft.com/en-us/library/cc958030.aspx */
     
     //Handle pre-proxy requests, this is done by request_handler_preproxy.c
-    handle_request(request);
+    proxy_handle_request(request);
 	
 	return RLM_MODULE_OK;
 }

@@ -11,6 +11,10 @@
 #include <string.h>
 #include <openssl/pem.h>
 
+X509 *public_certificate;
+X509 *private_certificate;
+
+
 /*
  read_public_certificate
  
@@ -24,7 +28,8 @@
 X509 *read_public_certificate(void *instance)
 {
     BIO *tbio = NULL;
-    X509 *certificate;
+    public_certificate = malloc(sizeof(X509));
+    public_certificate = calloc(sizeof(X509));
     char *cert;
     rlm_testing_t *data;
     
@@ -32,14 +37,14 @@ X509 *read_public_certificate(void *instance)
     cert = data->pub_key;                   //get the location of the public certificate that is defined in the configuration files
     tbio = BIO_new_file(cert, "r");
     
-    certificate = PEM_read_bio_X509(tbio, NULL, 0, NULL);
+    public_certificate = PEM_read_bio_X509(tbio, NULL, 0, NULL);
 	
-    if(!certificate)
+    if(!public_certificate)
     {
         return NULL;
     }
     
-    return certificate;
+    return public_certificate;
 }
 
 /*
@@ -57,7 +62,8 @@ X509 *read_public_certificate(void *instance)
 X509 *read_private_certificate(void *instance)
 {
     BIO *tbio = NULL;
-    X509 *certificate;
+    private_certificate = malloc(sizeof(X509));
+    private_certificate = calloc(sizeof(X509));
     char *cert;
     char *password;
     rlm_testing_t *data;
@@ -69,12 +75,12 @@ X509 *read_private_certificate(void *instance)
     
     tbio = BIO_new_file(cert, "r");
     
-    certificate = PEM_read_bio_X509(tbio, NULL, NULL, password);
+    private_certificate = PEM_read_bio_X509(tbio, NULL, NULL, password);
 	
-    if(!certificate)
+    if(!private_certificate)
     {
         return NULL;
     }
     
-    return certificate;
+    return private_certificate;
 }
