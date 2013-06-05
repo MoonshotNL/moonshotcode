@@ -43,7 +43,7 @@ int proxy_handle_request(REQUEST *request)
             do {
                 if (vp->attribute == AVP_PROXY_REQUEST) //detect if AVP_PROXY_REQUEST is sent by the idp module
                 {
-                    char *message_attributes = unpack_smime_text(vp->data.octets, private_key, public_cert);
+                    char *message_attributes = unpack_smime_text(vp->data.octets, private_key, private_cert);
 					char *out_message = obtain_attributes(message_attributes);
                     VALUE_PAIR *avp_attributes;
                     avp_attributes = pairmake("AVP_PROXY_ATTRIBUTES",
