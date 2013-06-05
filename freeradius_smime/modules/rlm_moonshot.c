@@ -6,10 +6,11 @@ RCSID("$Id$")
 #include <freeradius-devel/modules.h>
 
 #include "common.h"
-#include "proxymodule.h"
+#include "request_handler_preproxy.h"
 #include "idpmodule.h"
-#DEFINE AUTHENTICATION_REQUEST 1 //ACCEPT-REQUEST radius response
-#DEFINE AUTHENTICATION_ACK 2  //ACCEPT-ACCEPT radius response
+#include "x509_mod.h"
+#define AUTHENTICATION_REQUEST 1 //ACCEPT-REQUEST radius response
+#define AUTHENTICATION_ACK 2  //ACCEPT-ACCEPT radius response
 
 static const CONF_PARSER module_config[] = {
     { "pub_key",  PW_TYPE_STRING_PTR, offsetof(rlm_moonshot_t,pub_key), NULL,  NULL}, //holds location of the public certificate

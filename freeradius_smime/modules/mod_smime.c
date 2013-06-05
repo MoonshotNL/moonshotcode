@@ -44,7 +44,6 @@ int pack_mime_text(char *input, int len, char **output)
 {
 	int out_len = 0;
 	char *base64_input;
-	int base64_len;
 	base64_input = base64(input, len);
 
 	out_len = mime_add_header_text(base64_input, strlen(base64_input), output);
@@ -60,6 +59,7 @@ int unpack_mime_text(char *input, int len, char **output)
 	base64_len = mime_strip_header(MIMEHEADER_TEXT_LEN, input, len, &base64_out);
 
 	*output = unbase64(base64_out, strlen(base64_out));
+	return strlen(*output);
 }
 
 int pack_mime_cert(X509 *cert, char **output)

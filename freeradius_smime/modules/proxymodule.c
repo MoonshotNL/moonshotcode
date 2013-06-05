@@ -4,7 +4,7 @@
 #include <freeradius-devel/libradius.h>
 
 #include "common.h"
-#include "mod_mime.h"
+#include "mod_smime.h"
 
 #define STR_MAXLEN					1024
 
@@ -43,8 +43,6 @@ typedef struct attr_req_out
 AVP *atoavp(char *input)
 {
 	AVP *tmp_avp;
-	char *attr;
-	char *val;
 	int sep_offset = 0;
 	
 	while (sep_offset < strlen(input) && input[sep_offset] != '=')
@@ -65,7 +63,6 @@ ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len)
 	ATTR_REQ_IN *tmp_attr_req = rad_malloc(sizeof(ATTR_REQ_IN));
 
 	int input_cur = 0;
-	int item_len = 0;
 	int attr_p = 0;
 	int item_cur = 0;
 
@@ -138,14 +135,15 @@ ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len)
 				{
 					item_tmp[item_cur] = '\0';
 					
-                    tmp_attr_req->required_attr[attr_p] = atoavp(item_tmp);
-                    input_cur++;
-                    bzero(item_tmp, sizeof(char) * STR_MAXLEN);
-                    item_cur = 0;
+					memcpy(tmp_attr_req->provided_attr + (attr_p * sizeof(AVP)), atoavp(item_tmp), sizeof(AVP));
+					//tmp_attr_req->provided_attr[attr_p] = atoavp(item_tmp);
+               input_cur++;
+               bzero(item_tmp, sizeof(char) * STR_MAXLEN);
+               item_cur = 0;
 
 					attr_p++;
 
-					if (attr_p >= tmp_attr_req->required_attr_len)
+					if (attr_p >= tmp_attr_req->provided_attr_len)
 					{
 						state++;
 						attr_p = 0;
@@ -186,7 +184,7 @@ ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len)
 		case STATE_REQUESTED_ATTR:
 			if (input[input_cur] == ':')
 			{
-				item_tmp[item_cur] == '\0';
+				item_tmp[item_cur] = '\0';
 				
 				if (attr_p == 0)
 				{
@@ -195,14 +193,14 @@ ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len)
 				}
 				else
 				{
-					tmp_attr_req->requested_attr = realloc(tmp_attr_req->required_attr, sizeof(char *) * (attr_p + 1));
+					tmp_attr_req->requested_attr = realloc(tmp_attr_req->requested_attr, sizeof(char *) * (attr_p + 1));
 					tmp_attr_req->requested_attr[attr_p] = rad_malloc(item_cur + 1);
 				}
 				
-				memcpy(tmp_attr_req->required_attr[attr_p], item_tmp, item_cur + 1);
+				memcpy(tmp_attr_req->requested_attr[attr_p], item_tmp, item_cur + 1);
 				attr_p++;
 				
-				if (attr_p >= tmp_attr_req->required_attr_len)
+				if (attr_p >= tmp_attr_req->requested_attr_len)
 				{
 					state++;
 					attr_p = 0;
@@ -221,6 +219,34 @@ ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len)
 	return tmp_attr_req;
 }
 
+static AVP *get_avps_by_attributes(AVP *attributes, int length)
+{
+   //This function is to be implemented for the IDPs auathentication backend
+   AVP *avp_list;
+   int i;
+   char *dummy_attribute = "DummyAttr";
+   char *dummy_value = "DummyVal";
+
+   avp_list = rad_malloc(sizeof(AVP) * length);
+   if (!avp_list)
+   {
+      return NULL;
+   }
+
+   for (i = 0; i < length; i++)
+   {
+      avp_list[i].attribute = strdup(dummy_attribute);
+      if (!avp_list[i].attribute)
+         return NULL;
+
+      avp_list[i].value = strdup(dummy_value);
+      if (!avp_list[i].value)
+         return NULL;
+   }
+
+   return avp_list;
+}
+
 ATTR_REQ_OUT *get_attr_req_out(ATTR_REQ_IN *input)
 {
 	ATTR_REQ_OUT *outstruct;
@@ -229,7 +255,7 @@ ATTR_REQ_OUT *get_attr_req_out(ATTR_REQ_IN *input)
 	outstruct = rad_malloc(sizeof(ATTR_REQ_OUT));
 	memset(outstruct, 0, sizeof(ATTR_REQ_OUT));
 
-	pairs = get_avps_by_attributes(input->required_attr, input->required_attr_len);
+	pairs = get_avps_by_attributes(input->provided_attr, input->provided_attr_len);
 	if (!pairs)
 	{
 		return NULL;
@@ -250,16 +276,16 @@ int attr_req_out_to_string(ATTR_REQ_OUT *input, char **output)
 	
 	memset(buffer, 0, STR_MAXLEN);
 	
-	sprintf(buffer, "%lu:%s:%i", input->timestamp, input->servicedn, input->provided_attr_len);
-	for (i = 0; i < input->provided_attr_len; i++)
+	sprintf(buffer, "%lu:%s:%i", input->timestamp, input->servicedn, input->requested_attr_len);
+	for (i = 0; i < input->requested_attr_len; i++)
 	{
-		if (i == input->provided_attr_len - 1)
+		if (i == input->requested_attr_len - 1)
 		{
-			sprintf(buffer + strlen(buffer), "%s=%s", input->provided_attr[i].attribute, input->provided_attr[i].value);
+			sprintf(buffer + strlen(buffer), "%s=%s", input->requested_attr[i].attribute, input->requested_attr[i].value);
 		}
 		else
 		{
-			sprintf(buffer + strlen(buffer), "%s=%s:", input->provided_attr[i].attribute, input->provided_attr[i].value);	
+			sprintf(buffer + strlen(buffer), "%s=%s:", input->requested_attr[i].attribute, input->requested_attr[i].value);	
 		}
 	}
 	*output = rad_malloc(strlen(buffer));

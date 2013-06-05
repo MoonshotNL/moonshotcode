@@ -1,6 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#define ATTR_SMIME_CERTONLY 129
 #define ATTR_SMIME_REQUEST 128
 
 typedef struct rlm_moonshot_t {

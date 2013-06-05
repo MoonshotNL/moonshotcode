@@ -18,6 +18,8 @@
 #define STATE_REQUESTED_ATTR_LEN	5
 #define STATE_REQUESTED_ATTR		6
 
+extern EVP_PKEY *private_key;
+
 typedef struct avp_struct
 {
 	char *attribute;
@@ -51,7 +53,6 @@ static ATTR_REQ_IN *parse_attr_req(char *input, int len)
    int input_cur = 0;
 
    char item_tmp[STR_MAXLEN];
-   int item_len = 0;
    int item_cur = 0;
 
    int attr_p = 0;
@@ -309,8 +310,6 @@ static int attr_req_out_to_string(ATTR_REQ_OUT *input, char **output)
 
 static X509 *get_matching_certificate(REQUEST *request, char *dn)
 {
-	char *base64_cert;
-	BIO *bio;
 	X509 *tmp_cert;
 
 	VALUE_PAIR *vp = request->packet->vps;
@@ -318,36 +317,15 @@ static X509 *get_matching_certificate(REQUEST *request, char *dn)
 	{
 		if (vp->attribute == ATTR_SMIME_CERTONLY)
 		{
-			unpack_mime_cert(vp->data.octets, vp->data.length, &base64_cert);
-			if (!base64_cert)
-			{
-				continue;
-			}
-
-			bio = BIO_new_mem_buf(base64_cert, -1);
-			if (!bio)
-			{
-				free(base64_cert);
-				continue;
-			}
-
-			tmp_cert = PEM_read_bio_X509(bio, NULL, 0, NULL);
-			if (!tmp_cert)
-			{
-				free(base64_cert);
-				BIO_free(bio);
-				continue;
-			}
-
-			free(base64_cert);
-			BIO_free(bio);
+			unpack_mime_cert((char *)vp->data.octets, vp->length, &tmp_cert);
+			
 			if (strcmp(tmp_cert->name, dn) == 0)
 			{
 				return tmp_cert;
 			}
 			free(tmp_cert);
 		}
-	} while ((vp = vp->next) != 0)
+	} while ((vp = vp->next) != 0);
 	return NULL;
 }
 
@@ -358,17 +336,16 @@ static void handle_request(REQUEST *request, VALUE_PAIR *vp)
 	char *output_data;
 	int output_len;
 	char *smime_msg;
-	int smime_len;
 	ATTR_REQ_OUT *outstruct;
 	
-	input_len = mime_unpack_text(vp->data.octets, vp->length, &input_data);
-	ATTR_REQ *attr_request = parse_attr_req(input_data, input_len);
+	input_len = unpack_mime_text((char *)vp->data.octets, vp->length, &input_data);
+	ATTR_REQ_IN *attr_request = parse_attr_req(input_data, input_len);
 	if (!attr_request)
 	{
 		return;
 	}
 
-	X509 *cert = get_matching_certificate(request, attr_request->dn);
+	X509 *cert = get_matching_certificate(request, attr_request->proxydn);
 	if (!cert)
 	{
 		return;
@@ -391,5 +368,5 @@ void idp_handle_requests(REQUEST *request)
 		{
 			handle_request(request, vp);
 		}
-	} while ((vp = vp->next) != 0)
+	} while ((vp = vp->next) != 0);
 }

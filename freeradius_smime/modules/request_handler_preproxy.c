@@ -19,35 +19,40 @@
 #include <freeradius-devel/modules.h>
 
 #include "common.h"
-#include "mod_mime.h"
-#include "mod_x509.h"
+#include "mod_smime.h"
+#include "x509_mod.h"
+#include "proxymodule.h"
 
+extern X509 *public_certificate;
+extern X509 *private_certificate;
+extern EVP_PKEY *private_key;
 
 int proxy_handle_request(REQUEST *request)
 {
-    switch (request->packet->code) //it's allowed to handle multiple requests, the request type is based on radius responses
-    {
-        case PW_AUTHENTICATION_REQUEST:
-			char *cert_message;
-            pack_mime_cert(public_cert, &cert_message)
-            VALUE_PAIR *avp_certificate;
-            avp_certificate = pairmake("AVP_CERTIFICATE_RADIUS",
+	char *cert_message;
+	VALUE_PAIR *vp;
+	switch (request->packet->code) //it's allowed to handle multiple requests, the request type is based on radius responses
+   {
+   	case PW_AUTHENTICATION_REQUEST:
+      	pack_mime_cert(public_certificate, &cert_message);
+      	VALUE_PAIR *avp_certificate;
+      	avp_certificate = pairmake("AVP_CERTIFICATE_RADIUS",
                                        cert_message, T_OP_EQ); //AVP_CERTIFICATE_RADIUS is an AVP that stores the certificate chain
             pairadd(&request->reply->vps, avp_certificate); //add AVP
             return RLM_MODULE_UPDATED;                      //we are basically saying that our AVPs are updated
             
         case PW_AUTHENTICATION_ACK:
             
-            VALUE_PAIR *vp = request->packet->vps;
+            vp = request->packet->vps;
             
             do {
-                if (vp->attribute == AVP_PROXY_REQUEST) //detect if AVP_PROXY_REQUEST is sent by the idp module
+                if (vp->attribute == ATTR_SMIME_REQUEST) //detect if AVP_PROXY_REQUEST is sent by the idp module
                 {
-                    char *message_attributes = unpack_smime_text(vp->data.octets, private_key, private_cert);
+                    char *message_attributes = unpack_smime_text((char *)vp->data.octets, private_key, private_certificate);
 					char *out_message = obtain_attributes(message_attributes);
                     VALUE_PAIR *avp_attributes;
                     avp_attributes = pairmake("AVP_PROXY_ATTRIBUTES",
-                                         message_attributes, T_OP_EQ); //AVP_PROXY_ATTRIBUTES is an AVP that stores the attributes
+                                        out_message, T_OP_EQ); //AVP_PROXY_ATTRIBUTES is an AVP that stores the attributes
                     pairadd(&request->reply->vps, avp_attributes); //add AVP
                     return RLM_MODULE_UPDATED;                      //return statement that is needed when AVPs are updated
                 }

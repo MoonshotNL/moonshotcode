@@ -1,6 +1,6 @@
 #ifndef PROXYMODULE_H
 #define PROXYMODULE_H
 
-extern void handle_certinject(REQUEST *request);
+extern char *obtain_attributes(char *input);
 
 #endif
