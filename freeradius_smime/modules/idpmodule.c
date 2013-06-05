@@ -330,7 +330,7 @@ void idp_handle_requests(REQUEST *request)
 void handle_request(REQUEST *request, VALUE_PAIR *vp)
 {
 	char *input_data;
-	int input_leq
+	int input_len;
 	char *output_data;
 	int output_len;
 	ATTR_REQ_OUT *outstruct;
