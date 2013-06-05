@@ -24,11 +24,11 @@ static int moonshot_init(CONF_SECTION *conf, void **instance)
 	//Array that will store our parsed config data
 	rlm_moonshot_t *data;
 	
-	data = rad_malloc(sizeof(*data));
+	data = rad_malloc(sizeof(rlm_moonshot_t));
 	if (!data) {
 		return -1;
 	}
-	memset(data, 0, sizeof(*data));
+	memset(data, 0, sizeof(rlm_moonshot_t));
 
 	//Parse the config file using conf, data and our parse rules in module_config
 	if (cf_section_parse(conf, data, module_config) < 0) {
