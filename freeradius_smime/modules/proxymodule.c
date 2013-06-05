@@ -53,7 +53,7 @@ typedef struct attr_req_out
 	char **requested_attr;
 } ATTR_REQ_OUT;
 
-ATTR_REQ_IN *parse_attr_req(char *input, int len) //Input is our URN and it's length
+ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len) //Input is our URN and it's length
 {
 	ATTR_REQ_IN *tmp_attr_req = rad_malloc(sizeof(ATTR_REQ_IN)); //Temporary Attribute Request gets allocated some size. We use this temporary one to keep our data while we are still parsing the rest of the URN
 
@@ -253,6 +253,91 @@ ATTR_REQ_IN *parse_attr_req(char *input, int len) //Input is our URN and it's le
 	return tmp_attr_req;
 }
 
+ATTR_REQ_OUT *get_attr_req_out(ATTR_REQ_IN *input)
+{
+	ATTR_REQ_OUT *outstruct;
+	outstruct = rad_malloc(sizeof(ATTR_REQ_OUT));
+	memset(outstruct, 0, sizeof(ATTR_REQ_OUT));
+
+	outstruct->servicedn = input->servicedn;
+	outstruct->provided_attr_len = input->required_attr_len;
+	outstruct->provided_attr = get_avps_by_attributes(input->required_attr, input->required_attr_len);
+	outstruct->requested_attr_len = input->requested_attr_len;
+	outstruct->requested_attr = input->requested_attr;
+	outstruct->timestamp = (long) time(0);
+
+	return outstruct;
+}
+
+int attr_req_out_to_string(ATTR_REQ_OUT *input, char **output)
+{
+	int i;
+	char *tpm_string; //= rad_malloc(sizeof(char) * STR_MAXLEN);
+	int total_length = 0;
+	int timestamp_strlen = 0;
+	int servicedn_strlen = 0;
+	int provided_attr_len_strlen = 0;
+	int provided_attr_strlen[input->provided_attr_len];
+	int requested_attr_len_strlen = 0;
+	int requested_attr_strlen[input->requested_attr_len];
+
+	//Calculate the total length of the resulting string
+
+	//input->timestamp
+	digittest = input->timestamp;
+	while (digittest != 0) { digittest /= 10; timestamp_strlen++; }
+	length += timestamp_strlen;
+	length++; //The ':' delimiter
+
+	//input->servicedn
+	servicedn_strlen += strlen(input->servicedn);
+	length += servicedn_strlen;
+	length++;
+
+	//input->provided_attr_len
+	digittest = (long) input->provided_attr_len;
+	while (digittest != 0) { digittest /= 10; provided_attr_len_strlen++; }
+	length += provided_attr_len_strlen;
+	length++;
+
+	//input->provided_attr
+	for (i = 0; i < input->provided_attr_len; i++)
+	{
+		provided_attr_strlen[i] = 0;
+		provided_attr_strlen[i] = strlen(input->provided_attr[i].attribute);
+		length += provided_attr_strlen[i];
+		length++; //'='
+		length += strlen(input->provided_attr[i].value);
+		length++;
+	}
+
+	//input->requested_attr_len
+	digittest = (long) input->requested_attr_len;
+	while (digittest != 0) { digittest /= 10; length++; }
+	length++:
+
+	//input->requested_attr
+	for (i = 0; i < input->requested_attr_len; i++)
+	{
+		length += strlen(input->requested_attr[i]);
+		length++;
+	}
+	length++ //'\0'
+
+	sprintf(tmp_string, "%ld:", input->timestamp);
+	sprintf(tmp_string, "%s:", input->servicedn);
+	sprintf(tmp_string, "%i", input->provided_attr_len);
+	for (i = 0; i < input->provided_attr_len)
+	{
+		sprintf(tmp_string, "%s=%s:", input->provided_attr[i].attribute, input->provided_attr[i].value);
+	}
+	sprintf(tmp_string, "i", input->requested_attr_len);
+	for (i = 0; i < input->requested_attr_len; i++)
+	{
+		sprintf(
+	}
+}
+
 void proxy_handle_requests_client(){
     VALUE_PAIR *vp = request->packet->vps;
 	do
@@ -285,8 +370,9 @@ void proxy_handle_request(REQUEST *request, VALUE_PAIR *vp)
 	char *output_data;
 	int output_len;
 
+    //Most likely became unpack_mime_text
 	input_len = mime_unpack_attrrequest(vp->data.octets, vp->length, &input_data);
-	ATTR_REQ *attr_request = parse_attr_req(data, len);
+	ATTR_REQ *attr_request = proxy_parse_attr_req(data, len);
 	if (!attr_request)
 	{
 		return;
@@ -298,5 +384,6 @@ void proxy_handle_request(REQUEST *request, VALUE_PAIR *vp)
 		return;
 	}
 
-	output_len = create_output_request(attr_request, &output_data);
+    outstruct = get_attr_req_out(attr_request);
+	output_len = attr_req_out_to_string(attr_request, &output_data);
 }

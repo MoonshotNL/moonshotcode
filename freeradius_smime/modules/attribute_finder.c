@@ -10,6 +10,8 @@
 #include <freeradius-devel/modules.h>
 #include <freeradius-devel/libradius.h>
 
+#include "stdlib.h"
+
 #include "common.h"
 #include "mod_mime.h"
 
@@ -190,7 +192,11 @@ AVP extract_valuepair(char *raw_valuepair, bool is_required){
         } else { //If it is not a required attributevalue pair, it must requested. This means we DO have the attributename, but not the value. That value is found here.
             //!MAGIC!
             //This method (request_value_by_attribute() ) does NOT yet exist. The idea is to have a method that returns a char* representing the requested value, input being a char* representing the requested attribute
-            item_tmp = request_value_by_attribute(tmp_avp->attribute);
+            //item_tmp = request_value_by_attribute(tmp_avp->attribute);
+            double d = rand() / (double)RAND_MAX;
+            sprintf(item_tmp, "ThisIsAPlaceholder_%d", (long) d);
+            //!The above two lines are meant for spoofing so this thing works in a beta-environment while we still work on the functions in the VOMS server. While it is currently hardcoded, it should be replaced by the VOMS method later on!
+
             tmp_avp->value = rad_malloc(sizeof(item_tmp));
             memcpy(tmp_avp->value, item_tmp, sizeof(char) * (item_cur + 1));
             bzero(item_tmp, sizeof(char) * STR_MAXLEN);
