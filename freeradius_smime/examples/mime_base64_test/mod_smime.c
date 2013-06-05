@@ -147,3 +147,14 @@ int unpack_mime_cert(char *input, int len, X509 **cert)
 	
 	return 0;
 }
+
+int main(int argc, char **argv)
+{
+	char *out;
+
+	pack_mime_text(argv[1], strlen(argv[1]), &out);
+	printf("%s\n", out);
+
+	unpack_mime_text(out, strlen(out), &out);
+	printf("%s\n");
+}

@@ -17,9 +17,8 @@
 
 static int mime_strip_header(int header_len, char *input, int input_len, char **output)
 {
-	char *outstring = malloc(input_len - header_len);
-	memcpy(outstring, input + header_len, input_len - header_len);
-	*output = outstring;
+	*output = calloc(1, input_len - header_len);
+	memcpy(*output, input + header_len, input_len - header_len);
 	return input_len - header_len;
 }
 
@@ -27,82 +26,40 @@ static int mime_add_header_text(char *input, int input_len, char **output)
 {
 	char *header = "Mime-version: 1.0\nContent-Type: text/plain\nContent-Transfer-Encoding: base64\n\n";
 	*output = malloc((sizeof(char) * input_len) + (sizeof(char) * MIMEHEADER_TEXT_LEN) + 1);
-	memcpy(*output, header, MIMEHEADER_TEXT_LEN * sizeof(char));
-	memcpy(*output + (MIMEHEADER_TEXT_LEN * sizeof(char)), input, input_len);
-	output[input_len + MIMEHEADER_TEXT_LEN] = '\0';
+	strcpy(*output, header);
+	strcat(*output, input);
 	return input_len + MIMEHEADER_TEXT_LEN + 1;
 }
 
 static int mime_add_header_cert(char *input, int input_len, char **output)
 {
 	char *header = "Mime-Version: 1.0\nContent-Type: application/pkcs7-mime; smime-type=certs-only\nContent-Transfer-Encoding: base64\n\n";
-	*output = malloc((sizeof(char) * input_len) + (sizeof(char) * MIMEHEADER_CERT_LEN) + 1);
-	memcpy(*output, header, MIMEHEADER_CERT_LEN * sizeof(char));
-	memcpy(*output + (MIMEHEADER_CERT_LEN * sizeof(char)), input, input_len);
-	output[input_len + MIMEHEADER_CERT_LEN] = '\0';
+	*output = malloc(input_len + MIMEHEADER_CERT_LEN + 1);
+	strcpy(*output, header);
+	strcat(*output, input);
 	return input_len + MIMEHEADER_CERT_LEN + 1;
 }
 
 int pack_mime_text(char *input, int len, char **output)
 {
-    int out_len = 0;
-    char *base64_input;
+	int out_len = 0;
+	char *base64_input;
 	int base64_len;
-	char *mime_headers = "Mime-version: 1.0\nContent-Type: text/plain\nContent-Transfer-Encoding: base64\n\n";
-	int mime_headers_len = strlen(mime_headers);
-	base64_len = base64_encode(input, len, &base64_input);
+	base64_input = base64(input, len);
 
-	out_len = base64_len + mime_headers_len - 1;
-
-	*output = malloc(out_len * sizeof(char));
-	
-	strcpy(*output, mime_headers);
-	strcat(*output, base64_input);
+	out_len = mime_add_header_text(base64_input, strlen(base64_input), output);
 
 	return out_len;
 }
 
 int unpack_mime_text(char *input, int len, char **output)
 {
-	int state = 0;
-	int input_cur = 0;
-	int base64_buffer_cur = 0;
-	char *base64_buffer = malloc(STR_MAXLEN * sizeof(char));
+	char *base64_out;
+	int base64_len;
 
-	int header_cur = 0;
-	char *header = "Mime-version: 1.0\nContent-Type: text/plain\nContent-Transfer-Encoding: base64\n\n";
-	int header_len = strlen(header);
+	base64_len = mime_strip_header(MIMEHEADER_TEXT_LEN, input, len, &base64_out);
 
-	int output_len;
-
-	while (input_cur <= len)
-	{
-		switch(state)
-		{
-			case STATE_HEADER:
-				while(header_cur < header_len)
-				{
-					if (!header[header_cur] == input[input_cur])
-					{
-						return 0;
-					}
-					header_cur++;
-					input_cur++;
-				}
-				state++;
-				break;
-			case STATE_BODY:
-				base64_buffer[base64_buffer_cur] = input[input_cur];
-				base64_buffer_cur++;
-				input_cur++;
-				break;
-		}
-	}
-	base64_buffer[base64_buffer_cur] = '\0';
-
-	output_len = base64_decode(base64_buffer, base64_buffer_cur, output);
-	free(base64_buffer);
-	return output_len;
+	*output = unbase64(base64_out, strlen(base64_out));
 }
 
 int pack_mime_cert(X509 *cert, char **output)
@@ -125,7 +82,7 @@ int pack_mime_cert(X509 *cert, char **output)
 		return -1;
 	}
 
-	mime_add_header_cert(outbuffer, strnlen(outbuffer, 5120), *output);
+	mime_add_header_cert(outbuffer, strnlen(outbuffer, 5120), output);
 	free(outbuffer);
 	return 0;
 }
@@ -136,7 +93,7 @@ int unpack_mime_cert(char *input, int len, X509 **cert)
 	BIO *bio = NULL;
 	char *noheader;
 
-	mime_strip_header(input, strlen(input), &noheader);
+	mime_strip_header(MIMEHEADER_CERT_LEN, input, strlen(input), &noheader);
 
 	bio = BIO_new_mem_buf(noheader, -1);
 	if (!bio)
@@ -190,8 +147,6 @@ char *pack_smime_text(char *input, EVP_PKEY *pkey, X509 *pubcert)
       exit(1);
    }
 
-   BIO_reset(bio_in);
-
    if (!SMIME_write_CMS(bio_sig, cms_sig, bio_in, CMS_DETACHED|CMS_STREAM))
    {
       printf("Error SMIME_write_CMS bio_sig");
@@ -227,7 +182,7 @@ char *pack_smime_text(char *input, EVP_PKEY *pkey, X509 *pubcert)
 
 char *unpack_smime_text(char *input, EVP_PKEY *pkey, X509 *cert)
 {
-	BIO *bio_in = NULL, *bio_dec = NULL, *bio_out = NULL;
+	BIO *bio_in = NULL, *bio_out = NULL;
 	CMS_ContentInfo *cms = NULL;
 	char *output = NULL;
 	BUF_MEM *bptr = NULL;
@@ -235,10 +190,9 @@ char *unpack_smime_text(char *input, EVP_PKEY *pkey, X509 *cert)
 	OpenSSL_add_all_algorithms();
 
 	bio_in = BIO_new_mem_buf(input, -1);
-	bio_dec = BIO_new(BIO_s_mem());
 	bio_out = BIO_new(BIO_s_mem());
 
-	if (!bio_in || !bio_dec || !bio_out)
+	if (!bio_in || !bio_out)
 	{
 		printf("dectext: error creating bio_in, bio_dec or bio_out\n");
 		exit(1);

@@ -10,10 +10,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <openssl/pem.h>
+#include "common.h"
 
 X509 *public_certificate;
 X509 *private_certificate;
-
+EVP_PKEY *private_key;
 
 /*
  read_public_certificate
@@ -30,9 +31,9 @@ int read_public_certificate(void *instance)
     BIO *tbio = NULL;
     public_certificate = calloc(1, sizeof(X509));
     char *cert;
-    rlm_testing_t *data;
+    rlm_moonshot_t *data;
     
-    data = (rlm_testing_t *)instance;
+    data = (rlm_moonshot_t *)instance;
     cert = data->pub_key;                   //get the location of the public certificate that is defined in the configuration files
     tbio = BIO_new_file(cert, "r");
     
@@ -60,25 +61,25 @@ int read_public_certificate(void *instance)
 
 int read_private_certificate(void *instance)
 {
-    BIO *tbio = NULL;
-    private_certificate = calloc(1, sizeof(X509));
-    char *cert;
-    char *password;
-    rlm_testing_t *data;
-    int size;
+	BIO *tbio = NULL;
+	private_certificate = calloc(1, sizeof(X509));
+	char *cert;
+	char *password;
+	rlm_moonshot_t *data;
+	int size;
+ 
+	data = (rlm_moonshot_t *)instance;
+	cert = data->priv_key;
+	password = data->priv_key_password;         //get the password of the private key that is defined in the configuration files
     
-    data = (rlm_testing_t *)instance;
-    cert = data->priv_key;
-    password = data->priv_key_password;         //get the password of the private key that is defined in the configuration files
+	tbio = BIO_new_file(cert, "r");
     
-    tbio = BIO_new_file(cert, "r");
-    
-    private_certificate = PEM_read_bio_X509(tbio, NULL, NULL, password);
-	
-    if(!private_certificate)
-    {
-        return -1;
-    }
-    
-    return 0;
+	private_certificate = PEM_read_bio_X509(tbio, NULL, NULL, password);
+	private_key = PEM_read_bio_PrivateKey(tbio, NULL, 0, password);
+	if(!private_certificate || !private_key)
+	{
+		return -1;
+	}
+ 
+	return 0;
 }
