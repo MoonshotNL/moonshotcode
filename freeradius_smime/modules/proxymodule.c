@@ -16,28 +16,18 @@
 #define STATE_REQUESTED_ATTR_LEN	5
 #define STATE_REQUESTED_ATTR		6
 
-#ifndef PKCSCERT
-typedef struct pkcs
-{
-	int pubkey;
-} PKCSCERT;
-#endif
-
 typedef struct avp_struct //This is a structure for an AttributeValue Pair
 {
-	int attr_len; //This is the length of the attribute string. Can be used for safety, but this is not currently done or saved.
 	char *attribute; //The Attributename of this pair
-	int val_len;
 	char *value; //The Value of this pair
 } AVP;
 
 typedef struct attr_req_in //This is a structure for an Incoming Attribute Request.
 {
 	unsigned long timestamp; //We keep track of the timestamp
-	char *proxydn; //The Domain Name of the targeted proxy
 	char *servicedn; //The Domain Name of the targeted service
-	int required_attr_len; //Amount of required attribute/value pairs we can expect
-	AVP **required_attr; //An array of AVPs. See above Struct for details on what is included in here
+	int provided_attr_len; //Amount of required attribute/value pairs we can expect
+	AVP *provided_attr; //An array of AVPs. See above Struct for details on what is included in here
 	int requested_attr_len; //Amount of requested attributed we can expect
 	char **requested_attr; //Since these AVPs are not yet known at this position, we simply save the data here as a char-array rather than an AVP struct
 } ATTR_REQ_IN;
@@ -45,12 +35,9 @@ typedef struct attr_req_in //This is a structure for an Incoming Attribute Reque
 typedef struct attr_req_out
 {
 	unsigned long timestamp;
-	char *proxydn;
 	char *servicedn;
-	int provided_attr_len;
-	AVP **provided_attr;
 	int requested_attr_len;
-	char **requested_attr;
+	AVP *requested_attr;
 } ATTR_REQ_OUT;
 
 ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len) //Input is our URN and it's length
@@ -58,13 +45,13 @@ ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len) //Input is our URN and i
 	ATTR_REQ_IN *tmp_attr_req = rad_malloc(sizeof(ATTR_REQ_IN)); //Temporary Attribute Request gets allocated some size. We use this temporary one to keep our data while we are still parsing the rest of the URN
 
 	int input_cur = 0; //We start at the beginning of the URN, at posizion zero
-    int item_len = 0; //The length of the string we found
+	int item_len = 0; //The length of the string we found
 	int attr_p = 0; //Dont know what the P stands for exactly. But this value only shows up when parsing the required and requested attributes. So "attributes parsed"?
-    int item_cur = 0; //Added this to initialize it, but ask Sebastiaan about it. I expect some wonky naming conventions and such, but not like this
+	int item_cur = 0; //Added this to initialize it, but ask Sebastiaan about it. I expect some wonky naming conventions and such, but not like this
 
-    bool parsing_attributename = true;
+	int parsing_attributename = 1;
 
-    char item_tmp[STR_MAXLEN]; //Here we place the output while we are still working on it
+	char item_tmp[STR_MAXLEN]; //Here we place the output while we are still working on it
 
 	int state = STATE_TIMESTAMP; //We start at the first data in our URN, the timestamp
 
