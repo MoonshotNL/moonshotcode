@@ -38,8 +38,8 @@ static int moonshot_init(CONF_SECTION *conf, void **instance)
 
 	*instance = data;
     
-    read_public_certificate(instance);
-    read_private_certificate(instance);
+    read_public_certificate(*instance);
+    read_private_certificate(*instance);
 
 	return 0;
 }
