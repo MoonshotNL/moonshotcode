@@ -19,6 +19,14 @@ case "$a" in
 			yum -y update
 			yum -y install make autoconf gcc wget openssl-devel
 			
+			cd /etc/sysconfig/network-scripts
+			cat ifcfg-eth1 | sed "s/^ONBOOT=.*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" > ifcfg-eth1_new
+			echo"
+			IPADDR=192.168.56.101
+			NETMASK=255.255.255.0
+			" >> ifcfg-eth1_new
+			mv -f ifcfg-eth1_new ifcfg-eth1
+			
 			cd /usr/src
 			wget ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-2.1.12.tar.gz
 			tar -xzf freeradius-server-2.1.12.tar.gz
