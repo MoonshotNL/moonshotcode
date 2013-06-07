@@ -20,7 +20,7 @@ case "$a" in
 			yum -y install make autoconf gcc wget openssl-devel
 			
 			cd /etc/sysconfig/network-scripts
-			cat ifcfg-eth1 | sed "s/^ONBOOT=.*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" > ifcfg-eth1_new
+			sed "s/^ONBOOT=.*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
 			echo"
 			IPADDR=192.168.56.101
 			NETMASK=255.255.255.0
