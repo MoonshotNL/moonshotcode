@@ -18,7 +18,7 @@ case "$a" in
 	"root")
 			echo "Installation in progress"
 			yum -y update
-			yum -y install make autoconf gcc wget openssl-devel
+			yum -y install make autoconf gcc wget openssl-devel git
 			
 			cd /etc/sysconfig/network-scripts
 			cat ifcfg-eth1 > ifcfg-eth1_old
@@ -84,7 +84,7 @@ client janet{
 	"home")
 			echo "Installation in progress"
 			yum -y update
-			yum -y install make autoconf gcc wget openssl-devel
+			yum -y install make autoconf gcc wget openssl-devel git
 
 			cd /etc/sysconfig/network-scripts
 			cat ifcfg-eth1 > ifcfg-eth1_old
