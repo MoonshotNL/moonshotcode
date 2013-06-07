@@ -25,7 +25,7 @@ case "$a" in
 			IPADDR=192.168.56.101
 			NETMASK=255.255.255.0
 			" >> ifcfg-eth1_new
-			mv -f ifcfg-eth1_new ifcfg-eth1
+			cp ifcfg-eth1_new ifcfg-eth1
 			
 			cd /usr/src
 			wget ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-2.1.12.tar.gz
@@ -33,7 +33,7 @@ case "$a" in
 			rm -f freeradius-server-2.1.12.tar.gz
 			sleep 0.5
 			
-			cd ./freeradius-server-2.1.12.tar.gz
+			cd ./freeradius-server-2.1.12
 			./configure
 			make
 			make install
@@ -42,7 +42,22 @@ case "$a" in
 			git clone git://github.com/MoonshotNL/moonshotcode.git
 			mkdir rlm_moonshot
 			cp -vR ./moonshotcode/freeradius_smime/modules/* ./
-			rm -vrf ./moonshotcode
+			cd ./modules
+			sleep 0.5
+			make
+			make install
+			cd ..
+			rm -rvf ./moonshotcode
+			
+			cd /usr/local/etc/raddb
+			echo "
+			realm moonshot.nl{
+				type = radius
+				authhost = 192.168.56.102:1812
+				accthost = 192.168.56.102:1813
+				secret = testing123
+			}			
+			"
 			break
 			;;
 			
