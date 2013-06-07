@@ -77,6 +77,7 @@ client janet{
 			cat eap.conf > eap.conf_old
 			sed "s/default_eap_type = md5/default_eap_type = ttls/g" eap.conf_old > eap_conf_new
 			mv eap_conf_new eap.conf
+			rm -f eap.conf_old
 			
 			break
 			;;
@@ -84,7 +85,7 @@ client janet{
 	"home")
 			echo "Installation in progress"
 			yum -y update
-			yum -y install make autoconf gcc wget openssl-devel git
+			yum -y install make autoconf gcc wget openssl-devel git openldap-devel
 
 			cd /etc/sysconfig/network-scripts
 			cat ifcfg-eth1 > ifcfg-eth1_old
@@ -143,13 +144,16 @@ client root_radius{
 			cat eap.conf > eap.conf_old
 			sed "s/default_eap_type = md5/default_eap_type = ttls/g" eap.conf_old > eap_conf_new
 			mv eap_conf_new eap.conf
+			rm -f eap.conf_old
 			
 			cd ./sites-enabled
 			
 			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/inner-tunnel_conf
 			cat inner-tunnel_conf > ../sites-available/inner-tunnel
+			rm -f inner-tunnel_conf
 			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/default_conf
 			cat default_conf > ../sites-available/default
+			rm -f default_conf
 			
 			cd ..
 			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/ldap_conf
@@ -162,6 +166,13 @@ checkitem	Cleartext-Password		userPassword" >> ldap.attrmap
 			
 			break
 			;;
+			
+	"ldap")
+			yum -y update
+			yum -y install make autoconf gcc wget openssl-devel git
+			yum install openldap-servers
+			
+			
 			
 	"exit")
 			echo "Installation aborted by user."
