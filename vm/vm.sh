@@ -7,9 +7,9 @@ while true
 do
 echo "Please read the README before using this script."
 echo "Is this the server one of the following choice"
-echo "Root RADIUS (root)" #IP address:192..168.56.11
-echo "LDAP server (ldap)" #IP address:192..168.56.13
-echo "Home insitution RADIUS (home)" #IP address:192..168.56.12
+echo "Root RADIUS (root)" #IP address:192.168.56.11
+echo "LDAP server (ldap)" #IP address:192.168.56.13
+echo "Home insitution RADIUS (home)" #IP address:192.168.56.12
 #Janet IP address:192..168.56.14
 echo "Please select your choice (root/ldap/home/exit)"
 read a
@@ -146,9 +146,16 @@ client root_radius{
 			
 			cd ./sites-enabled
 			
-			cat inner-tunnel > inner-tunnel_old
-			sed "#       Auth-Type LDAP {/ s/# *//" -e "#               ldap/ s/# *//" -e  "#       }/ s# *//" inner-tunnel_old > inner-tunnel_new
-			mv inner-tunnel_new inner-tunnel
+			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/inner-tunnel_conf
+			cat inner-tunnel_conf > ../sites-available/inner-tunnel
+			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/default_conf
+			cat default_conf > ../sites-available/default
+			
+			cd ..
+			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/ldap_conf
+			mv ldap_conf ./modules/ldap
+			
+			
 			
 			echo "
 checkitem	Cleartext-Password		userPassword" >> ldap.attrmap
