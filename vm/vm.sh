@@ -45,8 +45,8 @@ NETMASK=255.255.255.0" >> ifcfg-eth1_new
 			cp -vR ./moonshotcode/freeradius_smime/modules/* ./
 			cd ./modules
 			sleep 0.5
-			make
-			make install
+			#make
+			#make install
 			cd ..
 			rm -rvf ./moonshotcode
 			
@@ -111,8 +111,8 @@ NETMASK=255.255.255.0" >> ifcfg-eth1_new
 			cp -vR ./moonshotcode/freeradius_smime/modules/* ./
 			cd ./modules
 			sleep 0.5
-			make
-			make install
+			#make
+			#make install
 			cd ..
 			rm -rvf ./moonshotcode
 
@@ -143,6 +143,15 @@ client root_radius{
 			cat eap.conf > eap.conf_old
 			sed "s/default_eap_type = md5/default_eap_type = ttls/g" eap.conf_old > eap_conf_new
 			mv eap_conf_new eap.conf
+			
+			cd ./sites-enabled
+			
+			cat inner-tunnel > inner-tunnel_old
+			sed "#       Auth-Type LDAP {/ s/# *//" -e "#               ldap/ s/# *//" -e  "#       }/ s# *//" inner-tunnel_old > inner-tunnel_new
+			mv inner-tunnel_new inner-tunnel
+			
+			echo "
+checkitem	Cleartext-Password		userPassword" >> ldap.attrmap
 			
 			break
 			;;
