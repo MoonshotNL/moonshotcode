@@ -363,8 +363,6 @@ static void handle_request(REQUEST *request, VALUE_PAIR *vp)
 		avp_smime = pairmake("Moonshot-Request", substr, T_OP_EQ);
 		pairadd(&request->reply->vps, avp_smime);
 	}
-	VALUE_PAIR *avp_smime = pairmake("Moonshot-Request",smime_msg, T_OP_EQ);
-	pairadd(&request->reply->vps, avp_smime);
 	return;
 }
 
