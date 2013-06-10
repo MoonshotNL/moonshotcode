@@ -36,7 +36,7 @@ int proxy_handle_request(REQUEST *request)
    	case PW_AUTHENTICATION_REQUEST:
       	pack_mime_cert(public_certificate, &cert_message);
       	VALUE_PAIR *avp_certificate;
-      	avp_certificate = pairmake("AVP_CERTIFICATE_RADIUS",
+      	avp_certificate = pairmake("Moonshot-Certificate",
                                        cert_message, T_OP_EQ); //AVP_CERTIFICATE_RADIUS is an AVP that stores the certificate chain
             pairadd(&request->reply->vps, avp_certificate); //add AVP
             return RLM_MODULE_UPDATED;                      //we are basically saying that our AVPs are updated
@@ -51,7 +51,7 @@ int proxy_handle_request(REQUEST *request)
                     char *message_attributes = unpack_smime_text((char *)vp->data.octets, private_key, private_certificate);
 					char *out_message = obtain_attributes(message_attributes);
                     VALUE_PAIR *avp_attributes;
-                    avp_attributes = pairmake("AVP_PROXY_ATTRIBUTES",
+                    avp_attributes = pairmake("Moonshot-Request",
                                         out_message, T_OP_EQ); //AVP_PROXY_ATTRIBUTES is an AVP that stores the attributes
                     pairadd(&request->reply->vps, avp_attributes); //add AVP
                     return RLM_MODULE_UPDATED;                      //return statement that is needed when AVPs are updated

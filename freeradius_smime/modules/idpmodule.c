@@ -315,7 +315,7 @@ static X509 *get_matching_certificate(REQUEST *request, char *dn)
 	VALUE_PAIR *vp = request->packet->vps;
 	do
 	{
-		if (vp->attribute == ATTR_SMIME_CERTONLY)
+		if (vp->attribute == ATTR_MOONSHOT_CERTIFICATE)
 		{
 			unpack_mime_cert((char *)vp->data.octets, vp->length, &tmp_cert);
 			
@@ -354,7 +354,7 @@ static void handle_request(REQUEST *request, VALUE_PAIR *vp)
 	outstruct = get_attr_req_out(attr_request);
 	output_len = attr_req_out_to_string(outstruct, &output_data);
 	smime_msg = pack_smime_text(output_data, private_key, cert);
-	VALUE_PAIR *avp_smime = pairmake("AVP_PROXYREQUEST_MOONSHOT",smime_msg, T_OP_EQ);
+	VALUE_PAIR *avp_smime = pairmake("Moonshot-Request",smime_msg, T_OP_EQ);
 	pairadd(&request->reply->vps, avp_smime);
 	return;
 }
@@ -364,7 +364,7 @@ void idp_handle_requests(REQUEST *request)
 	VALUE_PAIR *vp = request->packet->vps;
 	do
 	{
-		if (vp->attribute == ATTR_SMIME_REQUEST)
+		if (vp->attribute == ATTR_MOONSHOT_REQUEST)
 		{
 			handle_request(request, vp);
 		}
