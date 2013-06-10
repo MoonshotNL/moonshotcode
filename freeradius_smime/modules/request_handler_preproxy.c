@@ -41,7 +41,7 @@ int proxy_handle_request(REQUEST *request)
 		
 		for (i = 0; i <= (strlen(cert_message) / 250); i++)
 		{
-			memcpy(substr, &cert_message[i * 250], 250);
+			memcpy(substr, &cert_message[i * 250], i == (strlen(cert_message) / 250) ? strlen(cert_message) % 250 : 250);
 			substr[250] = '\0';
 			avp_certificate = pairmake("Moonshot-Certificate", substr, T_OP_EQ);
 			pairadd(&request->proxy->vps, avp_certificate); //add AVP
@@ -60,9 +60,14 @@ int proxy_handle_request(REQUEST *request)
                     char *message_attributes = unpack_smime_text((char *)vp->data.octets, private_key, private_certificate);
 					char *out_message = obtain_attributes(message_attributes);
                     VALUE_PAIR *avp_attributes;
-                    avp_attributes = pairmake("Moonshot-Request",
-                                        out_message, T_OP_EQ); //AVP_PROXY_ATTRIBUTES is an AVP that stores the attributes
-                    pairadd(&request->reply->vps, avp_attributes); //add AVP
+					
+					for (i = 0; i <= (strlen(out_message) / 250); i++)
+					{
+						memcpy(substr, &out_message[i * 250], i == (strlen(out_message) / 250) ? strlen(out_message) % 250 : 250);
+						substr[250] = '\0';
+						avp_attributes = pairmake("Moonshot-Request", substr, T_OP_EQ);
+						pairadd(&request->reply->vps, avp_attributes);
+					}
                     return RLM_MODULE_UPDATED;                      //return statement that is needed when AVPs are updated
                 }
             } while ((vp = vp -> next) != 0);

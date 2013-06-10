@@ -336,7 +336,10 @@ static void handle_request(REQUEST *request, VALUE_PAIR *vp)
 	char *output_data;
 	int output_len;
 	char *smime_msg;
+	char substr[250];
+	int i;
 	ATTR_REQ_OUT *outstruct;
+	VALUE_PAIR *avp_smime
 	
 	input_len = unpack_mime_text((char *)vp->data.octets, vp->length, &input_data);
 	ATTR_REQ_IN *attr_request = parse_attr_req(input_data, input_len);
@@ -354,6 +357,12 @@ static void handle_request(REQUEST *request, VALUE_PAIR *vp)
 	outstruct = get_attr_req_out(attr_request);
 	output_len = attr_req_out_to_string(outstruct, &output_data);
 	smime_msg = pack_smime_text(output_data, private_key, cert);
+	for (i = 0; i <= (strlen(smime_msg) / 250); i++)
+	{
+		memcpy(substr, &smime_msg[i * 250], i == (strlen(smime_msg) / 250) ? strlen(smime_msg) % 250 : 250);
+		avp_smime = pairmake("Moonshot-Request", substr, T_OP_EQ);
+		pairadd(&request->reply->vps, avp_smime);
+	}
 	VALUE_PAIR *avp_smime = pairmake("Moonshot-Request",smime_msg, T_OP_EQ);
 	pairadd(&request->reply->vps, avp_smime);
 	return;
