@@ -210,7 +210,9 @@ NETMASK=255.255.255.0" >> ifcfg-eth1_new
 			
 			chown -R ldap:ldap /var/lib/ldap
 			
-			service slapd restart
+			service slapd start
+			
+			sleep 1.0
 			
 			ldapadd -h localhost -D "cn=Manager,dc=moonshot,dc=nl" -f initial.ldif -w test
 			
