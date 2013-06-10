@@ -14,7 +14,7 @@ echo "Is this the server one of the following choice"
 echo "Root RADIUS (root)" #IP address:192.168.56.11
 echo "LDAP server (ldap)" #IP address:192.168.56.13
 echo "Home insitution RADIUS (home)" #IP address:192.168.56.12
-#Janet IP address:192..168.56.14
+#Janet IP address:192.168.56.14
 echo "Please select your choice (root/ldap/home/exit)"
 read a
 
@@ -43,14 +43,17 @@ NETMASK=255.255.255.0" >> ifcfg-eth1_new
 			make
 			make install
 			
-			cd ./modules
+			cd ./src/modules
 			git clone git://github.com/MoonshotNL/moonshotcode.git
-			mkdir rlm_moonshot
-			cp -vR ./moonshotcode/freeradius_smime/modules/* ./
-			cd ./modules
 			sleep 0.5
-			#make
-			#make install
+			mkdir rlm_moonshot
+			cp -vR ./moonshotcode/freeradius_smime/modules/* ./rlm_moonshot
+			cd ./rlm_moonshot
+			sleep 0.5
+			./configure
+			make
+			make install
+			sleep 0.5
 			cd ..
 			rm -rvf ./moonshotcode
 			
@@ -110,14 +113,17 @@ NETMASK=255.255.255.0" >> ifcfg-eth1_new
 			make
 			make install
 
-			cd ./modules
+			cd ./src/modules
 			git clone git://github.com/MoonshotNL/moonshotcode.git
-			mkdir rlm_moonshot
-			cp -vR ./moonshotcode/freeradius_smime/modules/* ./
-			cd ./modules
 			sleep 0.5
-			#make
-			#make install
+			mkdir rlm_moonshot
+			cp -vR ./moonshotcode/freeradius_smime/modules/* ./rlm_moonshot
+			cd ./rlm_moonshot
+			sleep 0.5
+			./configure
+			make
+			make install
+			sleep 0.5
 			cd ..
 			rm -rvf ./moonshotcode
 
@@ -174,7 +180,7 @@ checkitem	Cleartext-Password		userPassword" >> ldap.attrmap
 	"ldap")
 			yum -y update
 			yum -y install make autoconf gcc wget openssl-devel git man
-			yum install openldap-servers openldap-clients
+			yum -y install openldap-servers openldap-clients
 			
 			cd /etc/sysconfig/network-scripts
 			cat ifcfg-eth1 > ifcfg-eth1_old
@@ -194,8 +200,8 @@ NETMASK=255.255.255.0" >> ifcfg-eth1_new
 			
 			cd /etc/openldap/schema
 			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/initial_conf.ldif
-			mv initial_conf.ldif initial.conf
-			ldapadd -h localhost -W -D "cn=Manager,dc=moonshot,dc=nl" -f initial.ldif -w test
+			mv initial_conf.ldif initial.ldif
+			ldapadd -h localhost -D "cn=Manager,dc=moonshot,dc=nl" -f initial.ldif -w test
 			
 			chkconfig slapd on
 			

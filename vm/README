@@ -1,0 +1,20 @@
+README for vm.sh:
+
+The vm.sh will automatically install all packages and auto-configure them in order to work with the freeradius module.
+
+FreeRADIUS module that is going to be installed: https://github.com/MoonshotNL/moonshotcode/tree/master/freeradius_smime/modules
+
+Pre-requisites:
+Working installation of CentOS 6.4 x86_64
+Active Internet Connection (NAT) 	eth0
+Host-only adapter			eth1
+
+Configuration host-only adapter:
+Range: 192.168.56.0/24
+DHCP-server range: 192.168.56.100 - 192.168.56.254
+
+IP-settings eth1 (the script will configure this for you):
+Root RADIUS server: 			192.168.56.11
+Home RADIUS server:			192.168.56.12
+LDAP server:				192.168.56.13
+Janet:					192.168.56.14
