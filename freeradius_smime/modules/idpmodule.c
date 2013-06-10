@@ -329,7 +329,7 @@ static X509 *get_matching_certificate(REQUEST *request, char *dn)
 	return NULL;
 }
 
-static void handle_request(REQUEST *request, VALUE_PAIR *vp)
+static void handle_request(REQUEST *request, char *raw_input)
 {
 	char *input_data;
 	int input_len;
@@ -341,7 +341,7 @@ static void handle_request(REQUEST *request, VALUE_PAIR *vp)
 	ATTR_REQ_OUT *outstruct;
 	VALUE_PAIR *avp_smime;
 	
-	input_len = unpack_mime_text((char *)vp->data.octets, vp->length, &input_data);
+	input_len = unpack_mime_text(raw_input, strlen(raw_input), &input_data);
 	ATTR_REQ_IN *attr_request = parse_attr_req(input_data, input_len);
 	if (!attr_request)
 	{
@@ -369,11 +369,15 @@ static void handle_request(REQUEST *request, VALUE_PAIR *vp)
 void idp_handle_requests(REQUEST *request)
 {
 	VALUE_PAIR *vp = request->packet->vps;
+	//int started = 0;
+	char message[4096];
+	memset(message, 0, 4096);
 	do
 	{
 		if (vp->attribute == ATTR_MOONSHOT_REQUEST)
 		{
-			handle_request(request, vp);
+			strcat(message, vp->data.octets);
 		}
 	} while ((vp = vp->next) != 0);
+	handle_request(request, message);
 }
