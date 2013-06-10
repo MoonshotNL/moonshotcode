@@ -193,6 +193,7 @@ NETMASK=255.255.255.0" >> ifcfg-eth1_new
 			cd /etc/openldap
 			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/slapd_conf.conf
 			mv slapd_conf.conf slapd.conf
+			sleep 0.5
 			
 			chown -R ldap:ldap /var/lib/ldap
 			
