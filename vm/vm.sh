@@ -18,7 +18,7 @@ case "$a" in
 	"root")
 			echo "Installation in progress"
 			yum -y update
-			yum -y install make autoconf gcc wget openssl-devel git
+			yum -y install make autoconf gcc wget openssl-devel git openldap-devel man
 			
 			cd /etc/sysconfig/network-scripts
 			cat ifcfg-eth1 > ifcfg-eth1_old
@@ -85,7 +85,7 @@ client janet{
 	"home")
 			echo "Installation in progress"
 			yum -y update
-			yum -y install make autoconf gcc wget openssl-devel git openldap-devel
+			yum -y install make autoconf gcc wget openssl-devel git openldap-devel man
 
 			cd /etc/sysconfig/network-scripts
 			cat ifcfg-eth1 > ifcfg-eth1_old
@@ -169,10 +169,36 @@ checkitem	Cleartext-Password		userPassword" >> ldap.attrmap
 			
 	"ldap")
 			yum -y update
-			yum -y install make autoconf gcc wget openssl-devel git
-			yum install openldap-servers
+			yum -y install make autoconf gcc wget openssl-devel git man
+			yum install openldap-servers openldap-clients
+			
+			cd /etc/sysconfig/network-scripts
+			cat ifcfg-eth1 > ifcfg-eth1_old
+			sed "s/^ONBOOT=.*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
+			echo "
+IPADDR=192.168.56.13
+NETMASK=255.255.255.0" >> ifcfg-eth1_new
+			mv ifcfg-eth1_new ifcfg-eth1
+			
+			cd /etc/openldap
+			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/slapd_conf.conf
+			mv slapd_conf.conf slapd.conf
+			
+			chown -R ldap:ldap /var/lib/ldap
+			
+			service slapd start
+			
+			cd /etc/openldap/schema
+			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/initial_conf.ldif
+			mv initial_conf.ldif initial.conf
+			https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/inner-tunnel
+			
+			chkconfig slapd on
 			
 			
+			
+			break
+			;;
 			
 	"exit")
 			echo "Installation aborted by user."

@@ -1,0 +1,23 @@
+dn: dc=moonshot,dc=nl
+dc: moonshot
+description: Company moonshot
+objectClass: dcObject
+objectClass: organization
+o: moonshot
+
+dn: ou=people,dc=moonshot,dc=nl
+description: All the people in the hyrile organization
+objectClass: organizationalUnit
+ou: people
+
+dn: uid=bas@moonshot.nl,ou=people,dc=moonshot,dc=nl
+objectClass: top
+objectClass: radiusprofile
+objectClass: inetOrgPerson
+cn: bas
+sn: bas
+uid: bas
+radiusTunnelType: VLAN
+RadiusTunnelMediumType: 802
+radiusTunnelPrivateGroupID: 10
+userPassword:: aGFucw==
