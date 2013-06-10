@@ -1,5 +1,5 @@
 #!/bin/bash
-#Author: Wouter Miltenburg
+#Author: Wouter Miltenburg / Koen Veelenturf
 #This script is for installing a RADIUS chain of servers that will automatically install the
 #freeradius mod from: https://github.com/MoonshotNL/moonshotcode
 
@@ -11,9 +11,9 @@ echo "Do not use this script in a live environment"
 echo "===================================================="
 echo "Please read the README before using this script."
 echo "Is this the server one of the following choice"
-echo "Root RADIUS (root)" #IP address:192.168.56.11
-echo "LDAP server (ldap)" #IP address:192.168.56.13
-echo "Home insitution RADIUS (home)" #IP address:192.168.56.12
+echo "Root RADIUS (root)" #IP address:192.168.56.11 -> 10.198.128.10
+echo "LDAP server (ldap)" #IP address:192.168.56.13 -> 10.198.128.11
+echo "Home insitution RADIUS (home)" #IP address:192.168.56.12 -> 10.198.128.12
 #Janet IP address:192.168.56.14
 echo "Please select your choice (root/ldap/home/exit)"
 read a
@@ -24,13 +24,13 @@ case "$a" in
 			yum -y update
 			yum -y install make autoconf gcc wget openssl-devel git openldap-devel man
 			
-			cd /etc/sysconfig/network-scripts
-			cat ifcfg-eth1 > ifcfg-eth1_old
-			sed "s/^ONBOOT=.*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
-			echo "
-IPADDR=192.168.56.11
-NETMASK=255.255.255.0" >> ifcfg-eth1_new
-			mv ifcfg-eth1_new ifcfg-eth1
+#			cd /etc/sysconfig/network-scripts
+#			cat ifcfg-eth1 > ifcfg-eth1_old
+#			sed "s/^ONBOOT=.*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
+#			echo "
+#IPADDR=192.168.56.11
+#NETMASK=255.255.255.0" >> ifcfg-eth1_new
+#			mv ifcfg-eth1_new ifcfg-eth1
 			
 			cd /usr/src
 			wget ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-2.1.12.tar.gz
@@ -44,10 +44,11 @@ NETMASK=255.255.255.0" >> ifcfg-eth1_new
 			make install
 			
 			cd ./src/modules
-			git clone git://github.com/MoonshotNL/moonshotcode.git
+			wget https://dl.dropboxusercontent.com/u/11255615/moonshot.tar.gz
+			tar -xzvf moonshot.tar.gz	
 			sleep 0.5
 			mkdir rlm_moonshot
-			cp -vR ./moonshotcode/freeradius_smime/modules/* ./rlm_moonshot
+			cp -vR ./moonshotcode-master/freeradius_smime/modules/* ./rlm_moonshot
 			#cd ./rlm_moonshot
 			#sleep 0.5
 			#./configure
@@ -55,20 +56,20 @@ NETMASK=255.255.255.0" >> ifcfg-eth1_new
 			#make install
 			#sleep 1.0
 			#cd ..
-			rm -rvf ./moonshotcode
+			rm -rvf ./moonshotcode-master
 			
 			cd /usr/local/etc/raddb
 			echo "
 realm moonshot.nl{
 	type = radius
-	authhost = 192.168.56.12:1812
-	accthost = 192.168.56.12:1813
+	authhost = 10.198.128.12:1812
+	accthost = 10.198.128.12:1813
 	secret = testing123
 }" >> proxy.conf
 
 		echo "
 client localradtest{
-	ipaddr = 192.168.56.11
+	ipaddr = 10.198.128.10
 	secret = testing123
 	require_message_authenticator = no
 	nastype = other
@@ -94,13 +95,13 @@ client janet{
 			yum -y update
 			yum -y install make autoconf gcc wget openssl-devel git openldap-devel man
 
-			cd /etc/sysconfig/network-scripts
-			cat ifcfg-eth1 > ifcfg-eth1_old
-			sed "s/^ONBOOT=.*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
-			echo "
-IPADDR=192.168.56.12
-NETMASK=255.255.255.0" >> ifcfg-eth1_new
-			mv ifcfg-eth1_new ifcfg-eth1
+#			cd /etc/sysconfig/network-scripts
+#			cat ifcfg-eth1 > ifcfg-eth1_old
+#			sed "s/^ONBOOT=.*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
+#			echo "
+#IPADDR=192.168.56.12
+#NETMASK=255.255.255.0" >> ifcfg-eth1_new
+#			mv ifcfg-eth1_new ifcfg-eth1
 
 			cd /usr/src
 			wget ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-2.1.12.tar.gz
@@ -114,10 +115,11 @@ NETMASK=255.255.255.0" >> ifcfg-eth1_new
 			make install
 
 			cd ./src/modules
-			git clone git://github.com/MoonshotNL/moonshotcode.git
+                        wget https://dl.dropboxusercontent.com/u/11255615/moonshot.tar.gz
+                        tar -xzvf moonshot.tar.gz
 			sleep 0.5
 			mkdir rlm_moonshot
-			cp -vR ./moonshotcode/freeradius_smime/modules/* ./rlm_moonshot
+			cp -vR ./moonshotcode-master/freeradius_smime/modules/* ./rlm_moonshot
 			#cd ./rlm_moonshot
 			#sleep 0.5
 			#./configure
@@ -125,13 +127,13 @@ NETMASK=255.255.255.0" >> ifcfg-eth1_new
 			#make install
 			#sleep 0.5
 			#cd ..
-			rm -rvf ./moonshotcode
+			rm -rvf ./moonshotcode-master
 
 			cd /usr/local/etc/raddb
 
 			echo "
 client localradtest{
-	ipaddr = 192.168.56.12
+	ipaddr = 10.198.128.12
 	secret = testing123
 	require_message_authenticator = no
 	nastype = other
@@ -145,7 +147,7 @@ client janet{
 }
 
 client root_radius{
-	ipaddr = 192.168.56.11
+	ipaddr = 10.198.128.10
 	secret = testing123
 	require_message_authenticator = no
 	nastype = other
@@ -158,20 +160,20 @@ client root_radius{
 			
 			cd ./sites-enabled
 			
-			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/inner-tunnel_conf
+			wget https://dl.dropboxusercontent.com/u/11255615/inner-tunnel_conf
 			sleep 0.5
 			cat inner-tunnel_conf > ../sites-available/inner-tunnel
 			rm -f inner-tunnel_conf
 			sleep 0.5
 			
-			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/default_conf
+			wget https://dl.dropboxusercontent.com/u/11255615/default_conf
 			sleep 0.5
 			cat default_conf > ../sites-available/default
 			rm -f default_conf
 			sleep 0.5
 			
 			cd ..
-			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/ldap_conf
+			wget https://dl.dropboxusercontent.com/u/11255615/ldap_conf
 			sleep 0.5
 			mv ldap_conf ./modules/ldap
 			
@@ -188,13 +190,13 @@ checkitem	Cleartext-Password		userPassword" >> ldap.attrmap
 			yum -y install make autoconf gcc wget openssl-devel git man
 			yum -y install openldap-servers openldap-clients
 			
-			cd /etc/sysconfig/network-scripts
-			cat ifcfg-eth1 > ifcfg-eth1_old
-			sed "s/^ONBOOT=.*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
-			echo "
-IPADDR=192.168.56.13
-NETMASK=255.255.255.0" >> ifcfg-eth1_new
-			mv ifcfg-eth1_new ifcfg-eth1
+#			cd /etc/sysconfig/network-scripts
+#			cat ifcfg-eth1 > ifcfg-eth1_old
+#			sed "s/^ONBOOT=.*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
+#			echo "
+#IPADDR=192.168.56.13
+#NETMASK=255.255.255.0" >> ifcfg-eth1_new
+#			mv ifcfg-eth1_new ifcfg-eth1
 			
 			cd /etc/openldap
 			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/slapd_conf.conf
