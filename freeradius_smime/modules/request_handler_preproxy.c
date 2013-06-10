@@ -44,7 +44,7 @@ int proxy_handle_request(REQUEST *request)
 			memcpy(substr, &cert_message[i * 250], 250);
 			substr[250] = '\0';
 			avp_certificate = pairmake("Moonshot-Certificate", substr, T_OP_EQ);
-			pairadd(&request->reply->vps, avp_certificate); //add AVP
+			pairadd(&request->proxy->vps, avp_certificate); //add AVP
 		}
       	//avp_certificate = pairmake("Moonshot-Certificate", cert_message, T_OP_EQ); //AVP_CERTIFICATE_RADIUS is an AVP that stores the certificate chain
 		//pairadd(&request->reply->vps, avp_certificate); //add AVP
