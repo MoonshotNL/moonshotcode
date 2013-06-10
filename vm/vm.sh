@@ -159,14 +159,20 @@ client root_radius{
 			cd ./sites-enabled
 			
 			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/inner-tunnel_conf
+			sleep 0.5
 			cat inner-tunnel_conf > ../sites-available/inner-tunnel
 			rm -f inner-tunnel_conf
+			sleep 0.5
+			
 			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/default_conf
+			sleep 0.5
 			cat default_conf > ../sites-available/default
 			rm -f default_conf
+			sleep 0.5
 			
 			cd ..
 			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/ldap_conf
+			sleep 0.5
 			mv ldap_conf ./modules/ldap
 			
 			

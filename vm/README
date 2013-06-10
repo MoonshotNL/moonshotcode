@@ -13,8 +13,14 @@ Configuration host-only adapter:
 Range: 192.168.56.0/24
 DHCP-server range: 192.168.56.100 - 192.168.56.254
 
+WARNING:
+The follow IP-configuration will automatically be configured for you. If you want to give the VMs other IP-addresses you have to comment this out.
+
 IP-settings eth1 (the script will configure this for you):
 Root RADIUS server: 			192.168.56.11
 Home RADIUS server:			192.168.56.12
 LDAP server:				192.168.56.13
 Janet:					192.168.56.14
+
+Get a copy of the installation script:
+wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/vm.sh
