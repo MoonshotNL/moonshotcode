@@ -46,7 +46,7 @@ int proxy_handle_request(REQUEST *request)
             vp = request->packet->vps;
             
             do {
-                if (vp->attribute == ATTR_SMIME_REQUEST) //detect if AVP_PROXY_REQUEST is sent by the idp module
+                if (vp->attribute == ATTR_MOONSHOT_REQUEST) //detect if AVP_PROXY_REQUEST is sent by the idp module
                 {
                     char *message_attributes = unpack_smime_text((char *)vp->data.octets, private_key, private_certificate);
 					char *out_message = obtain_attributes(message_attributes);
