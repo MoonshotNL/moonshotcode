@@ -209,6 +209,7 @@ NETMASK=255.255.255.0" >> ifcfg-eth1_new
 			mv initial_conf.ldif initial.ldif
 			
 			chown -R ldap:ldap /var/lib/ldap
+			rm -rf /etc/openldap/slapd.d
 			
 			service slapd start
 			
