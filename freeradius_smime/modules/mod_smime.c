@@ -66,11 +66,13 @@ int pack_mime_cert(X509 *cert, char **output)
 {
 	BIO *bio = NULL;
 	char *outbuffer;
+	BUF_MEM *bptr;
 
 	outbuffer = malloc(5120);
 	memset(outbuffer, 0, 5120);
 
-	bio = BIO_new_mem_buf(outbuffer, -1);
+	//bio = BIO_new_mem_buf(outbuffer, -1);
+	bio = BIO_new(BIO_s_mem());
 	if (!bio)
 	{
 		return -1;
@@ -81,6 +83,9 @@ int pack_mime_cert(X509 *cert, char **output)
 		BIO_free(bio);
 		return -1;
 	}
+	
+	BIO_get_mem_ptr(bio_out, &bptr);
+	outbuffer = strdup(bptr->data, bptr->length);
 
 	mime_add_header_cert(outbuffer, strnlen(outbuffer, 5120), output);
 	free(outbuffer);
