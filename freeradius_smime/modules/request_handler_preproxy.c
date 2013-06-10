@@ -29,6 +29,8 @@ extern EVP_PKEY *private_key;
 
 int proxy_handle_request(REQUEST *request)
 {
+	char message[4096];
+	int found = 0;
 	int i;
 	char *cert_message;
 	char substr[251];
@@ -51,8 +53,6 @@ int proxy_handle_request(REQUEST *request)
 		return RLM_MODULE_UPDATED;                      //we are basically saying that our AVPs are updated
             
         case PW_AUTHENTICATION_ACK:
-            char message[4096];
-			int found = 0;
 			memset(message, 0, 4096);
 
             vp = request->packet->vps;
