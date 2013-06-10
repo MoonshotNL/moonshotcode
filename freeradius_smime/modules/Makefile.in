@@ -22,7 +22,7 @@
 #######################################################################
 TARGET      = @targetname@
 SRCS        = rlm_moonshot.c idpmodule.c mod_smime.c proxymodule.c request_handler_preproxy.c x509_mod.c
-RLM_CFLAGS  = @moonshot_cflags@
+RLM_CFLAGS  = @moonshot_cflags@ -Iinclude
 RLM_LIBS    = @moonshot_ldflags@
 RLM_INSTALL = install-moonshot
 
