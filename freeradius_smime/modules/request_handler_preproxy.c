@@ -29,17 +29,26 @@ extern EVP_PKEY *private_key;
 
 int proxy_handle_request(REQUEST *request)
 {
+	int i;
 	char *cert_message;
+	char substr[251];
 	VALUE_PAIR *vp;
 	switch (request->packet->code) //it's allowed to handle multiple requests, the request type is based on radius responses
-   {
+	{
    	case PW_AUTHENTICATION_REQUEST:
       	pack_mime_cert(public_certificate, &cert_message);
       	VALUE_PAIR *avp_certificate;
-      	avp_certificate = pairmake("Moonshot-Certificate",
-                                       cert_message, T_OP_EQ); //AVP_CERTIFICATE_RADIUS is an AVP that stores the certificate chain
-            pairadd(&request->reply->vps, avp_certificate); //add AVP
-            return RLM_MODULE_UPDATED;                      //we are basically saying that our AVPs are updated
+		
+		for (i = 0; i < (strlen(cert_message) / 250); i++)
+		{
+			memcpy(substr, &cert_message[i * 250], 250);
+			substr[250] = '\0';
+			avp_certificate = pairmake("Moonshot-Certificate", substr, T_OP_EQ);
+			pairadd(&request->reply->vps, avp_certificate); //add AVP
+		}
+      	//avp_certificate = pairmake("Moonshot-Certificate", cert_message, T_OP_EQ); //AVP_CERTIFICATE_RADIUS is an AVP that stores the certificate chain
+		//pairadd(&request->reply->vps, avp_certificate); //add AVP
+		return RLM_MODULE_UPDATED;                      //we are basically saying that our AVPs are updated
             
         case PW_AUTHENTICATION_ACK:
             
