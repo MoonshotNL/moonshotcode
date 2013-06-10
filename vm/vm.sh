@@ -53,7 +53,7 @@ NETMASK=255.255.255.0" >> ifcfg-eth1_new
 			./configure
 			make
 			make install
-			sleep 0.5
+			sleep 1.0
 			cd ..
 			rm -rvf ./moonshotcode
 			
@@ -203,9 +203,11 @@ NETMASK=255.255.255.0" >> ifcfg-eth1_new
 			
 			chown -R ldap:ldap /var/lib/ldap
 			
-			service slapd start
+			service slapd restart
 			
 			cd /etc/openldap/schema
+			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/radius.schema_conf
+			mv radius.schema_conf radius.schema
 			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/initial_conf.ldif
 			mv initial_conf.ldif initial.ldif
 			ldapadd -h localhost -D "cn=Manager,dc=moonshot,dc=nl" -f initial.ldif -w test
