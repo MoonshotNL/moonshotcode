@@ -5,6 +5,10 @@
 
 while true
 do
+echo "===================================================="
+echo "WARNING:"
+echo "Do not use this script in a live environment"
+echo "===================================================="
 echo "Please read the README before using this script."
 echo "Is this the server one of the following choice"
 echo "Root RADIUS (root)" #IP address:192.168.56.11
