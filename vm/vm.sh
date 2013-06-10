@@ -191,7 +191,7 @@ NETMASK=255.255.255.0" >> ifcfg-eth1_new
 			cd /etc/openldap/schema
 			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/initial_conf.ldif
 			mv initial_conf.ldif initial.conf
-			https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/inner-tunnel
+			ldapadd -h localhost -W -D "cn=Manager,dc=moonshot,dc=nl" -f initial.ldif -w test
 			
 			chkconfig slapd on
 			
