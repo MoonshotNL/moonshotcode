@@ -51,32 +51,34 @@ int proxy_handle_request(REQUEST *request)
 		return RLM_MODULE_UPDATED;                      //we are basically saying that our AVPs are updated
             
         case PW_AUTHENTICATION_ACK:
-            
+            char message[4096];
+			int found = 0;
+			memset(message, 0, 4096);
+
             vp = request->packet->vps;
             
             do {
                 if (vp->attribute == ATTR_MOONSHOT_REQUEST) //detect if AVP_PROXY_REQUEST is sent by the idp module
                 {
-                    char *message_attributes = unpack_smime_text((char *)vp->data.octets, private_key, private_certificate);
-					char *out_message = obtain_attributes(message_attributes);
-                    VALUE_PAIR *avp_attributes;
-					
-					for (i = 0; i <= (strlen(out_message) / 250); i++)
-					{
-						memcpy(substr, &out_message[i * 250], i == (strlen(out_message) / 250) ? strlen(out_message) % 250 : 250);
-						substr[250] = '\0';
-						avp_attributes = pairmake("Moonshot-Request", substr, T_OP_EQ);
-						pairadd(&request->reply->vps, avp_attributes);
-					}
-                    return RLM_MODULE_UPDATED;                      //return statement that is needed when AVPs are updated
+                    found = 1;
+					strcat(message, vp->data.octets);
                 }
             } while ((vp = vp -> next) != 0);
-            
-            
-            
-            
+			if (found)
+			{
+				char *message_attributes = unpack_smime_text((char *)vp->data.octets, private_key, private_certificate);
+				char *out_message = obtain_attributes(message_attributes);
+				VALUE_PAIR *avp_attributes;
+				
+				for (i = 0; i <= (strlen(out_message) / 250); i++)
+				{
+					memcpy(substr, &out_message[i * 250], i == (strlen(out_message) / 250) ? strlen(out_message) % 250 : 250);
+					substr[250] = '\0';
+					avp_attributes = pairmake("Moonshot-Request", substr, T_OP_EQ);
+					pairadd(&request->reply->vps, avp_attributes);
+				}
+				return RLM_MODULE_UPDATED;                      
+			}
     }
-    
-    
 }
 

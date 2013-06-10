@@ -369,15 +369,19 @@ static void handle_request(REQUEST *request, char *raw_input)
 void idp_handle_requests(REQUEST *request)
 {
 	VALUE_PAIR *vp = request->packet->vps;
-	//int started = 0;
+	int found = 0;
 	char message[4096];
 	memset(message, 0, 4096);
 	do
 	{
 		if (vp->attribute == ATTR_MOONSHOT_REQUEST)
 		{
+			found = 1;
 			strcat(message, vp->data.octets);
 		}
 	} while ((vp = vp->next) != 0);
-	handle_request(request, message);
+	if (found)
+	{
+		handle_request(request, message);
+	}
 }
