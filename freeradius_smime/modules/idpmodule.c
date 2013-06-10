@@ -339,7 +339,7 @@ static void handle_request(REQUEST *request, VALUE_PAIR *vp)
 	char substr[250];
 	int i;
 	ATTR_REQ_OUT *outstruct;
-	VALUE_PAIR *avp_smime
+	VALUE_PAIR *avp_smime;
 	
 	input_len = unpack_mime_text((char *)vp->data.octets, vp->length, &input_data);
 	ATTR_REQ_IN *attr_request = parse_attr_req(input_data, input_len);
