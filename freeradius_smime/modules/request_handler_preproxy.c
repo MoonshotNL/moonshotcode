@@ -39,7 +39,7 @@ int proxy_handle_request(REQUEST *request)
       	pack_mime_cert(public_certificate, &cert_message);
       	VALUE_PAIR *avp_certificate;
 		
-		for (i = 0; i < (strlen(cert_message) / 250); i++)
+		for (i = 0; i <= (strlen(cert_message) / 250); i++)
 		{
 			memcpy(substr, &cert_message[i * 250], 250);
 			substr[250] = '\0';
