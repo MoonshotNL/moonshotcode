@@ -26,7 +26,7 @@ case "$a" in
 			
 			cd /etc/sysconfig/network-scripts
 			cat ifcfg-eth1 > ifcfg-eth1_old
-			sed "s/^ONBOOT=.*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
+			sed "s/^ONBOOT=*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
 			echo "
 IPADDR=192.168.56.11
 NETMASK=255.255.255.0" >> ifcfg-eth1_new
@@ -96,7 +96,7 @@ client janet{
 
 			cd /etc/sysconfig/network-scripts
 			cat ifcfg-eth1 > ifcfg-eth1_old
-			sed "s/^ONBOOT=.*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
+			sed "s/^ONBOOT=*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
 			echo "
 IPADDR=192.168.56.12
 NETMASK=255.255.255.0" >> ifcfg-eth1_new
@@ -190,7 +190,7 @@ checkitem	Cleartext-Password		userPassword" >> ldap.attrmap
 			
 			cd /etc/sysconfig/network-scripts
 			cat ifcfg-eth1 > ifcfg-eth1_old
-			sed "s/^ONBOOT=.*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
+			sed "s/^ONBOOT=*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
 			echo "
 IPADDR=192.168.56.13
 NETMASK=255.255.255.0" >> ifcfg-eth1_new
