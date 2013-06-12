@@ -376,15 +376,16 @@ static void handle_request(REQUEST *request, char *raw_input)
 		return;
 	}
 
-	X509 *cert = get_matching_certificate(request, attr_request->proxydn);
-	if (!cert)
-	{
-		return;
-	}
+	//X509 *cert = get_matching_certificate(request, attr_request->proxydn);
+	//if (!cert)
+	//{
+	//	return;
+	//}
 
 	outstruct = get_attr_req_out(attr_request);
 	output_len = attr_req_out_to_string(outstruct, &output_data);
-	smime_msg = pack_smime_text(output_data, private_key, cert);
+	//smime_msg = pack_smime_text(output_data, private_key, cert);
+	pack_mime_text(output_data, strlen(output_data), &smime_msg);
 	for (i = 0; i <= (strlen(smime_msg) / 250); i++)
 	{
 		memcpy(substr, &smime_msg[i * 250], i == (strlen(smime_msg) / 250) ? strlen(smime_msg) % 250 : 250);
