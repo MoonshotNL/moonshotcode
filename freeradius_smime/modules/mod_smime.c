@@ -1,3 +1,6 @@
+/*
+This module is used to pack and unpack text and certificates, in either mime or s/mime format.
+*/
 #include "mod_base64.h"
 #include <openssl/pem.h>
 #include <openssl/cms.h>
