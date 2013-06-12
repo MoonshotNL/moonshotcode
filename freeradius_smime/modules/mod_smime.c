@@ -15,6 +15,9 @@
 
 #define MAX_MSGLEN	4096
 
+/*
+This function will strip the header off a mime-message, so it can be read "normally"
+*/
 static int mime_strip_header(int header_len, char *input, int input_len, char **output)
 {
 	*output = calloc(1, input_len - header_len);
@@ -22,6 +25,10 @@ static int mime_strip_header(int header_len, char *input, int input_len, char **
 	return input_len - header_len;
 }
 
+/*
+This function will add a mime-header to your input. This header will define the content of your input as base64 encoded text.
+If you are planning to add a header to a certificate(chain), see mime_add_header_cert();
+*/
 static int mime_add_header_text(char *input, int input_len, char **output)
 {
 	char *header = "Mime-version: 1.0\nContent-Type: text/plain\nContent-Transfer-Encoding: base64\n\n";
@@ -31,6 +38,10 @@ static int mime_add_header_text(char *input, int input_len, char **output)
 	return input_len + MIMEHEADER_TEXT_LEN + 1;
 }
 
+/*
+This function will add a mime-header to your input. This header will define the content of your input as a base64 encoded certificate(chain).
+If you are planning to add a header to regular text instead, see mime_add_header_text();
+*/
 static int mime_add_header_cert(char *input, int input_len, char **output)
 {
 	char *header = "Mime-Version: 1.0\nContent-Type: application/pkcs7-mime; smime-type=certs-only\nContent-Transfer-Encoding: base64\n\n";
@@ -40,6 +51,11 @@ static int mime_add_header_cert(char *input, int input_len, char **output)
 	return input_len + MIMEHEADER_CERT_LEN + 1;
 }
 
+/*
+This function will encode the input in base64 format, and return a mime-message. This input shall be treated as regular text.
+This will automatically call add_mime_header_text(). This should not be done manually.
+To pack the input as an s/mime-message, see pack_smime_text();
+*/
 int pack_mime_text(char *input, int len, char **output)
 {
 	int out_len = 0;
@@ -51,6 +67,10 @@ int pack_mime_text(char *input, int len, char **output)
 	return out_len;
 }
 
+/*
+This function is used to return a byte-array from a mime-message input.
+The message gets it's header stripped automatically. It is assumed the content of the message (minus the header) are base64 encoded.
+*/
 int unpack_mime_text(char *input, int len, char **output)
 {
 	char *base64_out;
@@ -62,6 +82,10 @@ int unpack_mime_text(char *input, int len, char **output)
 	return strlen(*output);
 }
 
+/*
+This function will encode the input in base64 format, and return a mime-message. This input shall be treated as a certificate(chain).
+This function will automatically call add_mime_header_text(). This should not be done manually.
+*/
 int pack_mime_cert(X509 *cert, char **output)
 {
 	BIO *bio = NULL;
@@ -71,7 +95,6 @@ int pack_mime_cert(X509 *cert, char **output)
 	outbuffer = malloc(5120);
 	memset(outbuffer, 0, 5120);
 
-	//bio = BIO_new_mem_buf(outbuffer, -1);
 	bio = BIO_new(BIO_s_mem());
 	if (!bio)
 	{
@@ -83,7 +106,7 @@ int pack_mime_cert(X509 *cert, char **output)
 		BIO_free(bio);
 		return -1;
 	}
-	
+
 	BIO_get_mem_ptr(bio, &bptr);
 	outbuffer = strndup(bptr->data, bptr->length);
 
@@ -92,6 +115,10 @@ int pack_mime_cert(X509 *cert, char **output)
 	return 0;
 }
 
+/*
+This function unpacks a certificate(chain) from a mime-message, and return an integer indicating it's success.
+The message gets it's header stripped automatically. It is assumed the content of the message (minus the header) are base64 encoded.
+*/
 int unpack_mime_cert(char *input, int len, X509 **cert)
 {
 	*cert = NULL;
@@ -112,10 +139,15 @@ int unpack_mime_cert(char *input, int len, X509 **cert)
 	{
 		return -1;
 	}
-	
+
 	return 0;
 }
 
+/*
+This function will encode the input in base64 format, and return a s/mime-message. This input shall be treated as regular text.
+To pack the input as a regular mime-message, see pack_mime_text();
+The content will be encrypted using the private key and public certificate supplemented.
+*/
 char *pack_smime_text(char *input, EVP_PKEY *pkey, X509 *pubcert)
 {
    STACK_OF(X509) *recips = NULL;
@@ -125,7 +157,6 @@ char *pack_smime_text(char *input, EVP_PKEY *pkey, X509 *pubcert)
    char *output = NULL;
    int flags = CMS_STREAM;
 
-   //Prepare general stuff
    OpenSSL_add_all_algorithms();
 
    recips = sk_X509_new_null();
@@ -185,6 +216,10 @@ char *pack_smime_text(char *input, EVP_PKEY *pkey, X509 *pubcert)
    return output;
 }
 
+/*
+This function will unpack an s/mime message and return it as a char pointer.
+This needs both the correct private key and x509 certificate.
+*/
 char *unpack_smime_text(char *input, EVP_PKEY *pkey, X509 *cert)
 {
 	BIO *bio_in = NULL, *bio_out = NULL;
@@ -202,7 +237,7 @@ char *unpack_smime_text(char *input, EVP_PKEY *pkey, X509 *cert)
 		printf("dectext: error creating bio_in, bio_dec or bio_out\n");
 		exit(1);
 	}
-	
+
 	cms = SMIME_read_CMS(bio_in, NULL);
 	if (!cms)
 	{
@@ -220,8 +255,8 @@ char *unpack_smime_text(char *input, EVP_PKEY *pkey, X509 *cert)
 	output = strndup(bptr->data, bptr->length);
 
 	CMS_ContentInfo_free(cms);
-   BIO_free(bio_in);
-   BIO_free(bio_out);
+    BIO_free(bio_in);
+    BIO_free(bio_out);
 
 	return output;
 }
