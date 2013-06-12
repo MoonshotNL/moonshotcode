@@ -57,24 +57,28 @@ int postproxy_handle_request(REQUEST *request)
 	char *cert_message;
 	char substr[251];
 	VALUE_PAIR *vp;
-
-	switch (request->packet->code) //it's allowed to handle multiple requests, the request type is based on radius responses
+	
+	DEBUG("ACKACK");
+	switch (request->proxy_reply->code) //it's allowed to handle multiple requests, the request type is based on radius responses
 	{
 		case PW_AUTHENTICATION_ACK:
 			memset(message, 0, 4096);
 
-			vp = request->packet->vps;
+			vp = reply->proxy_reply->vps;
 			do {
 				if (vp->attribute == ATTR_MOONSHOT_IDPREPLY) //detect if AVP_PROXY_REQUEST is sent by the idp module
 				{
 					found = 1;
-					strcat(message, vp->data.octets);
+					strncat(message, vp->data.octets, vp->length);
 				}
 			} while ((vp = vp -> next) != 0);
 		
 			if (found)
 			{
-				char *message_attributes = unpack_smime_text((char *)vp->data.octets, private_key, private_certificate);
+				//char *message_attributes = unpack_smime_text((char *)vp->data.octets, private_key, private_certificate);
+				char *message_attributes;
+				unpack_mime_text(message, strlen(message), &message_attributes);
+				DEBUG("MSG: %s", message_attributes);
 				char *out_message = obtain_attributes(message_attributes);
 				VALUE_PAIR *avp_attributes;
 
