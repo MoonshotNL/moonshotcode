@@ -36,7 +36,7 @@ int proxy_handle_request(REQUEST *request)
 
 		for (i = 0; i <= (strlen(cert_message) / 250); i++)
 		{
-			avp_msglen = i == (strlen(cert_message) / 250) ? strlen(cert_message) % 250 : 250/
+			avp_msglen = i == (strlen(cert_message) / 250) ? strlen(cert_message) % 250 : 250;
 			memcpy(substr, &cert_message[i * 250], avp_msglen);
 			substr[avp_msglen] = '\0';
 			avp_certificate = pairmake("Moonshot-Certificate", substr, T_OP_EQ);
