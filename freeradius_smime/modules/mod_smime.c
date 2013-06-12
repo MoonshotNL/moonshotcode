@@ -84,8 +84,8 @@ int pack_mime_cert(X509 *cert, char **output)
 		return -1;
 	}
 	
-	BIO_get_mem_ptr(bio_out, &bptr);
-	outbuffer = strdup(bptr->data, bptr->length);
+	BIO_get_mem_ptr(bio, &bptr);
+	outbuffer = strndup(bptr->data, bptr->length);
 
 	mime_add_header_cert(outbuffer, strnlen(outbuffer, 5120), output);
 	free(outbuffer);
