@@ -311,21 +311,49 @@ static int attr_req_out_to_string(ATTR_REQ_OUT *input, char **output)
 static X509 *get_matching_certificate(REQUEST *request, char *dn)
 {
 	X509 *tmp_cert;
+	char certmsg[4096];
+	int cert_started = 0;
+
+	memset(certmsg, 0, 4096);
 
 	VALUE_PAIR *vp = request->packet->vps;
 	do
 	{
-		if (vp->attribute == ATTR_MOONSHOT_CERTIFICATE)
+		if (cert_started)
 		{
-			unpack_mime_cert((char *)vp->data.octets, vp->length, &tmp_cert);
-			
-			if (strcmp(tmp_cert->name, dn) == 0)
+			if (vp->attribute == ATTR_MOONSHOT_CERTIFICATE)
 			{
-				return tmp_cert;
+				if (strncmp(certmsg, "Mime-Version 1.0", strlen("Mime-Version 1.0") == 0))
+				{
+					unpack_mime_cert(certmsg, strlen(certmsg), &tmp_cert);
+					if (strcmp(tmp_cert->name, dn) == 0)
+					{
+						return tmp_cert;
+					}
+					free(tmp_cert);
+					memset(certmsg, 0, 4096);
+				}
+				strcat(certmsg, vp->data.octets);
 			}
-			free(tmp_cert);
+		}
+		else
+		{
+			if (strncmp(certmsg, "Mime-Version 1.0", strlen("Mime-Version 1.0") == 0))
+			{
+				strcat(certmsg, vp->data.octets);
+				cert_started = 1;
+			}
 		}
 	} while ((vp = vp->next) != 0);
+	
+	unpack_mime_cert(certmsg, strlen(certmsg), &tmp_cert);
+
+	if (strcmp(tmp_cert->name, dn) == 0)
+	{
+		return tmp_cert;
+	}
+
+	free(tmp_cert);
 	return NULL;
 }
 
