@@ -64,7 +64,7 @@ int postproxy_handle_request(REQUEST *request)
 		case PW_AUTHENTICATION_ACK:
 			memset(message, 0, 4096);
 
-			vp = reply->proxy_reply->vps;
+			vp = request->proxy_reply->vps;
 			do {
 				if (vp->attribute == ATTR_MOONSHOT_IDPREPLY) //detect if AVP_PROXY_REQUEST is sent by the idp module
 				{
