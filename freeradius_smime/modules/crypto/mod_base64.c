@@ -34,6 +34,7 @@ memset(buffer, 0, length);
 b64 = BIO_new(BIO_f_base64());
 bmem = BIO_new_mem_buf(input, length);
 bmem = BIO_push(b64, bmem);
+BIO_set_flags(bmem, BIO_FLAGS_BASE64_NO_NL);
 
 BIO_read(bmem, buffer, length);
 
