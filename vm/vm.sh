@@ -17,20 +17,34 @@ echo "Home insitution RADIUS (home)" #IP address:192.168.56.12
 #Janet IP address:192.168.56.14
 echo "Please select your choice (root/ldap/home/exit)"
 read a
+echo "===================================================="
+echo "WARNING:"
+echo "The following choice can have impact on your internet performance"
+echo "===================================================="
+echo "Do you want that the script modifies eth1, for a test environment in virtualbox select yes (yes/no)"
+read b
+echo "Do you want to continue the installation and is your previous answer correct (yes/no)?"
+if [ "$b" == "no" ]; then
+	echo "The installation will proceed without configuring your eth1 device"
+fi
 
+if [ "$c" == " yes" ]; then
+	
 case "$a" in
 	"root")
 			echo "Installation in progress"
 			yum -y update
 			yum -y install make autoconf gcc wget openssl-devel git openldap-devel man
 			
-			cd /etc/sysconfig/network-scripts
-			cat ifcfg-eth1 > ifcfg-eth1_old
-			sed "s/^ONBOOT=*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
-			echo "
+			if [ "$b" == "yes" ]; then
+				cd /etc/sysconfig/network-scripts
+				cat ifcfg-eth1 > ifcfg-eth1_old
+				sed "s/^ONBOOT=*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
+				echo "
 IPADDR=192.168.56.11
 NETMASK=255.255.255.0" >> ifcfg-eth1_new
-			mv ifcfg-eth1_new ifcfg-eth1
+				mv ifcfg-eth1_new ifcfg-eth1
+			fi
 			
 			cd /usr/src
 			wget ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-2.1.12.tar.gz
@@ -94,13 +108,15 @@ client janet{
 			yum -y update
 			yum -y install make autoconf gcc wget openssl-devel git openldap-devel man
 
-			cd /etc/sysconfig/network-scripts
-			cat ifcfg-eth1 > ifcfg-eth1_old
-			sed "s/^ONBOOT=*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
-			echo "
+			if [ "$b" == "yes"]
+				cd /etc/sysconfig/network-scripts
+				cat ifcfg-eth1 > ifcfg-eth1_old
+				sed "s/^ONBOOT=*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
+				echo "
 IPADDR=192.168.56.12
 NETMASK=255.255.255.0" >> ifcfg-eth1_new
-			mv ifcfg-eth1_new ifcfg-eth1
+				mv ifcfg-eth1_new ifcfg-eth1
+			fi
 
 			cd /usr/src
 			wget ftp://ftp.freeradius.org/pub/freeradius/freeradius-server-2.1.12.tar.gz
@@ -188,13 +204,15 @@ checkitem	Cleartext-Password		userPassword" >> ldap.attrmap
 			yum -y install make autoconf gcc wget openssl-devel git man
 			yum -y install openldap-servers openldap-clients
 			
-			cd /etc/sysconfig/network-scripts
-			cat ifcfg-eth1 > ifcfg-eth1_old
-			sed "s/^ONBOOT=*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
-			echo "
+			if [ "$b" == "yes"]
+				cd /etc/sysconfig/network-scripts
+				cat ifcfg-eth1 > ifcfg-eth1_old
+				sed "s/^ONBOOT=*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
+				echo "
 IPADDR=192.168.56.13
 NETMASK=255.255.255.0" >> ifcfg-eth1_new
-			mv ifcfg-eth1_new ifcfg-eth1
+				mv ifcfg-eth1_new ifcfg-eth1
+			fi
 			
 			cd /etc/openldap
 			wget https://raw.github.com/MoonshotNL/moonshotcode/master/vm/configuration_files/slapd_conf.conf
@@ -235,4 +253,19 @@ NETMASK=255.255.255.0" >> ifcfg-eth1_new
 			
 esac
 
+else
+	echo "Installation aborted"
+fi
+
 done
+
+echo "===================================================="
+echo "WARNING:"
+echo "When you choice the option to install the internet configuration yourself"
+echo "you must check the following files and change them for the correct"
+echo "settings"
+echo "/usr/local/etc/raddb/clients.conf"
+echo "/usr/local/etc/raddb/proxy.conf"
+echo "/usr/local/etc/raddb/modules/ldap"
+echo "/etc/openldap/slapd.conf"
+echo "===================================================="
