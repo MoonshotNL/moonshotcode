@@ -101,7 +101,7 @@ module_t rlm_moonshot = {
 		NULL,			/* accounting */
 		NULL,			/* checksimul */
 		moonshot_preproxy,	/* pre-proxy */
-		NULL,			/* post-proxy */
+		moonshot_postproxy,			/* post-proxy */
 		moonshot_postauth	/* post-auth */
 	},
 };
