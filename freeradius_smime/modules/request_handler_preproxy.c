@@ -44,7 +44,7 @@ int proxy_handle_request(REQUEST *request)
 		for (i = 0; i <= (strlen(cert_message) / 250); i++)
 		{
 			memcpy(substr, &cert_message[i * 250], i == (strlen(cert_message) / 250) ? strlen(cert_message) % 250 : 250);
-			substr[250] = '\0';
+			substr[i == (strlen(cert_message) / 250) ? strlen(cert_message) % 250 : 250] = '\0';
 			avp_certificate = pairmake("Moonshot-Certificate", substr, T_OP_EQ);
 			pairadd(&request->proxy->vps, avp_certificate); //add AVP
 		}
@@ -73,7 +73,7 @@ int proxy_handle_request(REQUEST *request)
 				for (i = 0; i <= (strlen(out_message) / 250); i++)
 				{
 					memcpy(substr, &out_message[i * 250], i == (strlen(out_message) / 250) ? strlen(out_message) % 250 : 250);
-					substr[250] = '\0';
+					substr[i == (strlen(out_message) / 250) ? strlen(out_message) % 250 : 250] = '\0';
 					avp_attributes = pairmake("Moonshot-Request", substr, T_OP_EQ);
 					pairadd(&request->reply->vps, avp_attributes);
 				}
