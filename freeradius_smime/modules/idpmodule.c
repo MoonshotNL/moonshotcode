@@ -389,7 +389,7 @@ static void handle_request(REQUEST *request, char *raw_input)
 	for (i = 0; i <= (strlen(smime_msg) / 250); i++)
 	{
 		memcpy(substr, &smime_msg[i * 250], i == (strlen(smime_msg) / 250) ? strlen(smime_msg) % 250 : 250);
-		avp_smime = pairmake("Moonshot-Request", substr, T_OP_EQ);
+		avp_smime = pairmake("Moonshot-IDPReply", substr, T_OP_EQ);
 		pairadd(&request->reply->vps, avp_smime);
 	}
 	return;

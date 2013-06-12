@@ -65,7 +65,7 @@ int postproxy_handle_request(REQUEST *request)
 
 			vp = request->packet->vps;
 			do {
-				if (vp->attribute == ATTR_MOONSHOT_REQUEST) //detect if AVP_PROXY_REQUEST is sent by the idp module
+				if (vp->attribute == ATTR_MOONSHOT_IDPREPLY) //detect if AVP_PROXY_REQUEST is sent by the idp module
 				{
 					found = 1;
 					strcat(message, vp->data.octets);
@@ -83,8 +83,8 @@ int postproxy_handle_request(REQUEST *request)
 					avp_msglen = i == (strlen(out_message) / 250) ? strlen(out_message) % 250 : 250;
 					memcpy(substr, &out_message[i * 250], avp_msglen);
 					substr[avp_msglen] = '\0';
-					avp_attributes = pairmake("Moonshot-Request", substr, T_OP_EQ);
-					pairadd(&request->reply->vps, avp_attributes);
+					avp_attributes = pairmake("Moonshot-ProxyReply", substr, T_OP_EQ);
+					pairadd(&request->proxy_reply->vps, avp_attributes);
 				}
 				return RLM_MODULE_UPDATED;
 			}
