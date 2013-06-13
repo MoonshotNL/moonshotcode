@@ -24,11 +24,13 @@ echo "===================================================="
 echo "Do you want that the script modifies eth1, for a test environment in virtualbox select yes (yes/no)"
 read b
 echo "Do you want to continue the installation and is your previous answer correct (yes/no)?"
+read c
+
 if [ "$b" == "no" ]; then
 	echo "The installation will proceed without configuring your eth1 device"
 fi
 
-if [ "$c" == " yes" ]; then
+if [ "$c" == "yes" ]; then
 	
 case "$a" in
 	"root")
@@ -108,7 +110,7 @@ client janet{
 			yum -y update
 			yum -y install make autoconf gcc wget openssl-devel git openldap-devel man
 
-			if [ "$b" == "yes"]
+			if [ "$b" == "yes" ]; then
 				cd /etc/sysconfig/network-scripts
 				cat ifcfg-eth1 > ifcfg-eth1_old
 				sed "s/^ONBOOT=*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
@@ -204,7 +206,7 @@ checkitem	Cleartext-Password		userPassword" >> ldap.attrmap
 			yum -y install make autoconf gcc wget openssl-devel git man
 			yum -y install openldap-servers openldap-clients
 			
-			if [ "$b" == "yes"]
+			if [ "$b" == "yes" ]; then
 				cd /etc/sysconfig/network-scripts
 				cat ifcfg-eth1 > ifcfg-eth1_old
 				sed "s/^ONBOOT=*/ONBOOT=yes/g" -e "s/^BOOTPROTO=.*/BOOTPROTO=static/g" ifcfg-eth1 > ifcfg-eth1_new
