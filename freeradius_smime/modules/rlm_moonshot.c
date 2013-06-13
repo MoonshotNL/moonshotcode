@@ -51,7 +51,18 @@ static int moonshot_preproxy(void *instance, REQUEST *request)
 	instance = instance;
 
     //Handle pre-proxy requests, this is done by request_handler_preproxy.c
-    proxy_handle_request(request);
+    preproxy_handle_request(request);
+
+	return RLM_MODULE_OK;
+}
+
+static int moonshot_postproxy(void *instance, REQUEST *request)
+{
+	/* quiet the compiler */
+	instance = instance;
+
+    //Handle pre-proxy requests, this is done by request_handler_preproxy.c
+    postproxy_handle_request(request);
 
 	return RLM_MODULE_OK;
 }
@@ -90,7 +101,7 @@ module_t rlm_moonshot = {
 		NULL,			/* accounting */
 		NULL,			/* checksimul */
 		moonshot_preproxy,	/* pre-proxy */
-		NULL,			/* post-proxy */
+		moonshot_postproxy,			/* post-proxy */
 		moonshot_postauth	/* post-auth */
 	},
 };
