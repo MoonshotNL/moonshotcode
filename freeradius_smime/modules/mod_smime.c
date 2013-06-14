@@ -28,9 +28,9 @@ static void remove_nl(char **string)
 	
 	for (i = 0; i < strlen(*string); i++)
 	{
-		if (*string[i] != '\n')
+		if ((*string)[i] != '\n')
 		{
-			buffer[buf_cur] = *string[i];
+			buffer[buf_cur] = (*string)[i];
 			buf_cur++;
 		}
 	}
