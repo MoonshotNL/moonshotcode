@@ -18,6 +18,27 @@ This module is used to pack and unpack text and certificates, in either mime or 
 
 #define MAX_MSGLEN	4096
 
+static void remove_nl(char **string)
+{
+	char *buffer;
+	int i, buf_cur;
+	
+	buffer = calloc(strlen(*string) + 1, sizeof(char));
+	buf_cur = 0;
+	
+	for (i = 0; i < strlen(*string); i++)
+	{
+		if (*string[i] != '\n')
+		{
+			buffer[buf_cur] = *string[i];
+			buf_cur++;
+		}
+	}
+	
+	free(*string);
+	*string = buffer;
+}
+
 /*
 This function will strip the header off a mime-message, so it can be read "normally"
 */
@@ -80,7 +101,7 @@ int unpack_mime_text(char *input, int len, char **output)
 	int base64_len;
 
 	base64_len = mime_strip_header(MIMEHEADER_TEXT_LEN, input, len, &base64_out);
-
+	remove_nl(&base64_out);
 	*output = unbase64(base64_out, strlen(base64_out));
 	return strlen(*output);
 }
