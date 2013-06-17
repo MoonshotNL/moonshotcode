@@ -1,3 +1,7 @@
+/*
+This module is the starting point.
+It decides the path the incoming request should take, sending it to either the request_handler_preproxy or idpmodule.
+*/
 #include <freeradius-devel/ident.h>
 RCSID("$Id$")
 
@@ -24,7 +28,7 @@ static int moonshot_init(CONF_SECTION *conf, void **instance)
 {
 	//Array that will store our parsed config data
 	rlm_moonshot_t *data;
-	
+
 	data = rad_malloc(sizeof(rlm_moonshot_t));
 	if (!data) {
 		return -1;
@@ -38,42 +42,47 @@ static int moonshot_init(CONF_SECTION *conf, void **instance)
 	}
 
 	*instance = data;
-    
+
     read_public_certificate(*instance);
     read_private_certificate(*instance);
 
 	return 0;
 }
 
+/*
+Handle pre-proxy requests, this is done by request_handler_preproxy.c
+*/
 static int moonshot_preproxy(void *instance, REQUEST *request)
 {
 	/* quiet the compiler */
 	instance = instance;
 
-    //Handle pre-proxy requests, this is done by request_handler_preproxy.c
     preproxy_handle_request(request);
 
 	return RLM_MODULE_OK;
 }
 
+/*
+Handle pre-proxy requests, this is done by request_handler_preproxy.c
+*/
 static int moonshot_postproxy(void *instance, REQUEST *request)
 {
 	/* quiet the compiler */
 	instance = instance;
 
-    //Handle pre-proxy requests, this is done by request_handler_preproxy.c
     postproxy_handle_request(request);
 
 	return RLM_MODULE_OK;
 }
 
+/*
+Gives the idp_module requests to handle, provided Radius gave us an ACCESS_ACCEPT
+*/
 static int moonshot_postauth(void *instance, REQUEST *request)
 {
 	/* quiet the compiler */
 	instance = instance;
-
-	//Is it an Access-Accept?
-	if (request->reply->code == PW_AUTHENTICATION_ACK)
+    if (request->reply->code == PW_AUTHENTICATION_ACK)
 	{
 		idp_handle_requests(request);
 	}
@@ -81,6 +90,9 @@ static int moonshot_postauth(void *instance, REQUEST *request)
 	return RLM_MODULE_OK;
 }
 
+/*
+Unregister our module to free up space
+*/
 static int moonshot_detach(void *instance)
 {
 	free(instance);

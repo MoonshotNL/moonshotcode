@@ -1,3 +1,5 @@
+/*
+This module is used to obtain the requested attributenames out of a URN, and obtain the values from their location.*/
 #include <freeradius-devel/radiusd.h>
 #include <freeradius-devel/radius.h>
 #include <freeradius-devel/modules.h>
@@ -22,6 +24,9 @@ typedef struct avp_struct
 	char *value;
 } AVP;
 
+/*
+This struct holds the values of a URN, taken from an incoming request.
+*/
 typedef struct attr_req_in
 {
 	unsigned long timestamp;
@@ -32,6 +37,9 @@ typedef struct attr_req_in
 	char **requested_attr;
 } ATTR_REQ_IN;
 
+/*
+This struct holds the values to be used in a URN, to be injected in an outgoing request.
+*/
 typedef struct attr_req_out
 {
 	unsigned long timestamp;
@@ -40,24 +48,30 @@ typedef struct attr_req_out
 	AVP *requested_attr;
 } ATTR_REQ_OUT;
 
+/*
+Transform the input to an attributevalue pair
+*/
 AVP *atoavp(char *input)
 {
 	AVP *tmp_avp;
 	int sep_offset = 0;
-	
+
 	while (sep_offset < strlen(input) && input[sep_offset] != '=')
 		sep_offset++;
-	
+
 	if (sep_offset == strlen(input) - 1)
 		return NULL;
-	
+
 	tmp_avp = rad_malloc(sizeof(AVP));
 	tmp_avp->attribute = strndup(input, sep_offset);
 	tmp_avp->value = strdup(input + sep_offset + 1);
-	
+
 	return tmp_avp;
 }
 
+/*
+This function reads a URN, and places it's information into a ATTR_REQ_IN struct. It is dependant on the URN having the right structure, and knowing the correct length of the URN.
+*/
 ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len)
 {
 	ATTR_REQ_IN *tmp_attr_req = rad_malloc(sizeof(ATTR_REQ_IN));
@@ -111,7 +125,7 @@ ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len)
 					item_tmp[item_cur] = '\0';
 					tmp_attr_req->provided_attr_len = (int) strtol(item_tmp, NULL, 10);
 					tmp_attr_req->provided_attr = rad_malloc(sizeof(AVP) * tmp_attr_req->provided_attr_len);
-					
+
 					if (tmp_attr_req->provided_attr_len == 0)
 					{
 						state += 2;
@@ -134,7 +148,7 @@ ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len)
 				if (input[input_cur] == ':')
 				{
 					item_tmp[item_cur] = '\0';
-					
+
 					memcpy(tmp_attr_req->provided_attr + (attr_p * sizeof(AVP)), atoavp(item_tmp), sizeof(AVP));
 					//tmp_attr_req->provided_attr[attr_p] = atoavp(item_tmp);
                input_cur++;
@@ -162,7 +176,7 @@ ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len)
 			{
 				item_tmp[item_cur] = '\0';
 				tmp_attr_req->requested_attr_len = (int) strtol(item_tmp, NULL, 10);
-				
+
 				if (tmp_attr_req->requested_attr_len == 0)
 				{
 					state += 2;
@@ -171,7 +185,7 @@ ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len)
 				{
 					state++;
 				}
-				
+
 				input_cur++;
 				bzero(item_tmp, sizeof(char) * STR_MAXLEN);
 				item_cur = 0;
@@ -185,7 +199,7 @@ ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len)
 			if (input[input_cur] == ':')
 			{
 				item_tmp[item_cur] = '\0';
-				
+
 				if (attr_p == 0)
 				{
 					tmp_attr_req->requested_attr = rad_malloc(sizeof(char *));
@@ -196,10 +210,10 @@ ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len)
 					tmp_attr_req->requested_attr = realloc(tmp_attr_req->requested_attr, sizeof(char *) * (attr_p + 1));
 					tmp_attr_req->requested_attr[attr_p] = rad_malloc(item_cur + 1);
 				}
-				
+
 				memcpy(tmp_attr_req->requested_attr[attr_p], item_tmp, item_cur + 1);
 				attr_p++;
-				
+
 				if (attr_p >= tmp_attr_req->requested_attr_len)
 				{
 					state++;
@@ -219,6 +233,9 @@ ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len)
 	return tmp_attr_req;
 }
 
+/*
+Obtain the values of an attributevalue pair. !This is currently a dummy-function!
+*/
 static AVP *get_avps_by_attributes(AVP *attributes, int length)
 {
    //This function is to be implemented for the IDPs auathentication backend
@@ -247,6 +264,9 @@ static AVP *get_avps_by_attributes(AVP *attributes, int length)
    return avp_list;
 }
 
+/*
+Transform an incoming request to an outgoing request.
+*/
 ATTR_REQ_OUT *get_attr_req_out(ATTR_REQ_IN *input)
 {
 	ATTR_REQ_OUT *outstruct;
@@ -269,13 +289,16 @@ ATTR_REQ_OUT *get_attr_req_out(ATTR_REQ_IN *input)
 	return outstruct;
 }
 
+/*
+Reads the variables from an ATTR_REQ_OUT struct, and places it in a correctly formatted URN.
+*/
 int attr_req_out_to_string(ATTR_REQ_OUT *input, char **output)
 {
 	char buffer[STR_MAXLEN];
 	int i;
-	
+
 	memset(buffer, 0, STR_MAXLEN);
-	
+
 	sprintf(buffer, "%lu:%s:%i", input->timestamp, input->servicedn, input->requested_attr_len);
 	for (i = 0; i < input->requested_attr_len; i++)
 	{
@@ -285,7 +308,7 @@ int attr_req_out_to_string(ATTR_REQ_OUT *input, char **output)
 		}
 		else
 		{
-			sprintf(buffer + strlen(buffer), "%s=%s:", input->requested_attr[i].attribute, input->requested_attr[i].value);	
+			sprintf(buffer + strlen(buffer), "%s=%s:", input->requested_attr[i].attribute, input->requested_attr[i].value);
 		}
 	}
 	*output = rad_malloc(strlen(buffer));
@@ -293,12 +316,15 @@ int attr_req_out_to_string(ATTR_REQ_OUT *input, char **output)
 	return strlen(*output);
 }
 
+/*
+Extract the attributes from an charpointer
+*/
 char *obtain_attributes(char *input)
 {
 	ATTR_REQ_IN *instruct;
 	ATTR_REQ_OUT *outstruct;
 	char *outmsg;
-	
+
 	instruct = proxy_parse_attr_req(input, strlen(input));
 	outstruct = get_attr_req_out(instruct);
 	attr_req_out_to_string(outstruct, &outmsg);

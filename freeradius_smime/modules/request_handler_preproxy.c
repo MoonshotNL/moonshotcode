@@ -1,10 +1,7 @@
-//
-//  request_handler_preproxy.c
-//
-//
-//  Created by W.A. Miltenburg on 15-05-13.
-//
-//
+/*
+This module is used to handle requests directed at the proxy.
+It will perform different actions depending on the FreeRadius code available inside the request.
+*/
 
 #include <freeradius-devel/radiusd.h>
 #include <freeradius-devel/radius.h>
@@ -19,6 +16,9 @@ extern X509 *public_certificate;
 extern X509 *private_certificate;
 extern EVP_PKEY *private_key;
 
+/*
+Handles requests before they have been handled by the proxy-server.
+*/
 int preproxy_handle_request(REQUEST *request)
 {
 	char message[4096];
@@ -48,6 +48,9 @@ int preproxy_handle_request(REQUEST *request)
 	}
 }
 
+/*
+Handles request that have been handled by a proxy, and thus have a Radius-reply
+*/
 int postproxy_handle_request(REQUEST *request)
 {
 	char message[4096];
@@ -57,7 +60,7 @@ int postproxy_handle_request(REQUEST *request)
 	char *cert_message;
 	char substr[251];
 	VALUE_PAIR *vp;
-	
+
 	DEBUG("ACKACK");
 	switch (request->proxy_reply->code) //it's allowed to handle multiple requests, the request type is based on radius responses
 	{
@@ -72,7 +75,7 @@ int postproxy_handle_request(REQUEST *request)
 					strncat(message, vp->data.octets, vp->length);
 				}
 			} while ((vp = vp -> next) != 0);
-		
+
 			if (found)
 			{
 				//char *message_attributes = unpack_smime_text((char *)vp->data.octets, private_key, private_certificate);

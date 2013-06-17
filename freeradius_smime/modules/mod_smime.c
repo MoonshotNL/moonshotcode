@@ -18,14 +18,17 @@ This module is used to pack and unpack text and certificates, in either mime or 
 
 #define MAX_MSGLEN	4096
 
+/*
+Return a substring of the input, up until (but not including) the null terminator.
+*/
 static void remove_nl(char **string)
 {
 	char *buffer;
 	int i, buf_cur;
-	
+
 	buffer = calloc(strlen(*string) + 1, sizeof(char));
 	buf_cur = 0;
-	
+
 	for (i = 0; i < strlen(*string); i++)
 	{
 		if ((*string)[i] != '\n')
@@ -34,7 +37,7 @@ static void remove_nl(char **string)
 			buf_cur++;
 		}
 	}
-	
+
 	free(*string);
 	*string = buffer;
 }
