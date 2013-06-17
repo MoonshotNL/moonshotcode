@@ -250,7 +250,7 @@ char *unpack_smime_text(char *input, EVP_PKEY *pkey, X509 *cert)
 	CMS_ContentInfo *cms = NULL;
 	char *output = NULL;
 	BUF_MEM *bptr = NULL;
-
+	
 	OpenSSL_add_all_algorithms();
 
 	bio_in = BIO_new_mem_buf(input, -1);
@@ -258,20 +258,21 @@ char *unpack_smime_text(char *input, EVP_PKEY *pkey, X509 *cert)
 
 	if (!bio_in || !bio_out)
 	{
-		printf("dectext: error creating bio_in, bio_dec or bio_out\n");
+		DEBUG("dectext: error creating bio_in, bio_dec or bio_out");
 		exit(1);
 	}
-
+	DEBUG("About to read the CMS");
 	cms = SMIME_read_CMS(bio_in, NULL);
 	if (!cms)
 	{
-		printf("Error parsing message to CMS\n");
+		DEBUG("Error parsing message to CMS");
 		exit(1);
 	}
 
+	DEBUG("About to CMS_decrypt");
 	if (!CMS_decrypt(cms, pkey, cert, NULL, bio_out, 0))
 	{
-		printf("Error decrypting message\n");
+		DEBUG("Error decrypting message");
 		exit(1);
 	}
 

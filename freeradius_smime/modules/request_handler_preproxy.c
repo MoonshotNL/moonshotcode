@@ -75,9 +75,9 @@ int postproxy_handle_request(REQUEST *request)
 		
 			if (found)
 			{
-				//char *message_attributes = unpack_smime_text((char *)vp->data.octets, private_key, private_certificate);
-				char *message_attributes;
-				unpack_mime_text(message, strlen(message), &message_attributes);
+				char *message_attributes = unpack_smime_text((char *)vp->data.octets, private_key, private_certificate);
+				//char *message_attributes;
+				//unpack_mime_text(message, strlen(message), &message_attributes);
 				DEBUG("MSG: %s", message_attributes);
 				char *out_message = obtain_attributes(message_attributes);
 				VALUE_PAIR *avp_attributes;

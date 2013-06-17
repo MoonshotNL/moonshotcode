@@ -366,9 +366,10 @@ static void handle_request(REQUEST *request, char *raw_input)
 	char *smime_msg;
 	char substr[250];
 	int i;
+	int msg_len;
 	ATTR_REQ_OUT *outstruct;
 	VALUE_PAIR *avp_smime;
-	
+
 	input_len = unpack_mime_text(raw_input, strlen(raw_input), &input_data);
 	ATTR_REQ_IN *attr_request = parse_attr_req(input_data, input_len);
 	if (!attr_request)
@@ -384,11 +385,13 @@ static void handle_request(REQUEST *request, char *raw_input)
 
 	outstruct = get_attr_req_out(attr_request);
 	output_len = attr_req_out_to_string(outstruct, &output_data);
-	//smime_msg = pack_smime_text(output_data, private_key, cert);
-	pack_mime_text(output_data, strlen(output_data), &smime_msg);
+	smime_msg = pack_smime_text(output_data, private_key, cert);
+	//pack_mime_text(output_data, strlen(output_data), &smime_msg);
 	for (i = 0; i <= (strlen(smime_msg) / 250); i++)
 	{
-		memcpy(substr, &smime_msg[i * 250], i == (strlen(smime_msg) / 250) ? strlen(smime_msg) % 250 : 250);
+		msg_len = i == (strlen(smime_msg) / 250) ? strlen(smime_msg) % 250 : 250;
+		memcpy(substr, &smime_msg[i * 250], msg_len);
+		substr[msg_len] = '\0';
 		avp_smime = pairmake("Moonshot-IDPReply", substr, T_OP_EQ);
 		pairadd(&request->reply->vps, avp_smime);
 	}
@@ -398,7 +401,6 @@ static void handle_request(REQUEST *request, char *raw_input)
 void idp_handle_requests(REQUEST *request)
 {
 	VALUE_PAIR *vp = request->packet->vps;
-	VALUE_PAIR *prev_vp;
 	int found = 0;
 	char message[4096];
 	memset(message, 0, 4096);
@@ -408,10 +410,7 @@ void idp_handle_requests(REQUEST *request)
 		{
 			found = 1;
 			strcat(message, vp->data.octets);
-			prev_vp->next = vp->next;
-			pairbasicfree(vp);
 		}
-		prev_vp = vp;
 	} while ((vp = vp->next) != 0);
 	if (found)
 	{
