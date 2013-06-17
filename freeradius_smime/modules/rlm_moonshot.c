@@ -82,13 +82,9 @@ static int moonshot_postauth(void *instance, REQUEST *request)
 {
 	/* quiet the compiler */
 	instance = instance;
-<<<<<<< HEAD
 
 	//Is it an Access-Accept and we're not a proxy?
 	if (request->reply->code == PW_AUTHENTICATION_ACK && request->proxy_reply == NULL)
-=======
-    if (request->reply->code == PW_AUTHENTICATION_ACK)
->>>>>>> c723bbdd0bb3cf3c0e2358c06c50e12315a08813
 	{
 		idp_handle_requests(request);
 	}
