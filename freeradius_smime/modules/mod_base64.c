@@ -1,8 +1,14 @@
+/*
+This module is used to format strings to Base64 and vice versa.
+*/
 #include <openssl/bio.h>
 #include <openssl/evp.h>
 #include <openssl/buffer.h>
 #include <string.h>
 
+/*
+Format a string in Base64.
+*/
 char *base64(const unsigned char *input, int length)
 {
 	BIO *bmem, *b64;
@@ -25,6 +31,9 @@ char *base64(const unsigned char *input, int length)
 	return buff;
 }
 
+/*
+Change Base64 formattedtext to a string.
+*/
 char *unbase64(unsigned char *input, int length)
 {
 	BIO *b64, *bmem;
