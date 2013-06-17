@@ -22,6 +22,7 @@ This module is used to handle requests directed at the identity provider.
 #define STATE_REQUESTED_ATTR		6
 
 extern EVP_PKEY *private_key;
+extern X509		*public_certificate;
 
 /*
 This struct holds the attributename and value of an attribute/value pair.
@@ -360,14 +361,14 @@ static X509 *get_matching_certificate(REQUEST *request, char *dn)
 					free(tmp_cert);
 					memset(certmsg, 0, 4096);
 				}
-				strcat(certmsg, vp->data.octets);
+				strcat(certmsg, (char *)vp->data.octets);
 			}
 		}
 		else
 		{
 			if (strncmp(certmsg, "Mime-Version 1.0", strlen("Mime-Version 1.0") == 0))
 			{
-				strcat(certmsg, vp->data.octets);
+				strcat(certmsg, (char *)vp->data.octets);
 				cert_started = 1;
 			}
 		}
@@ -415,7 +416,7 @@ static void handle_request(REQUEST *request, char *raw_input)
 
 	outstruct = get_attr_req_out(attr_request);
 	output_len = attr_req_out_to_string(outstruct, &output_data);
-	smime_msg = pack_smime_text(output_data, private_key, cert);
+	smime_msg = pack_smime_text(output_data, private_key, public_certificate);
 	//pack_mime_text(output_data, strlen(output_data), &smime_msg);
 	for (i = 0; i <= (strlen(smime_msg) / 250); i++)
 	{
@@ -442,7 +443,7 @@ void idp_handle_requests(REQUEST *request)
 		if (vp->attribute == ATTR_MOONSHOT_REQUEST)
 		{
 			found = 1;
-			strcat(message, vp->data.octets);
+			strcat(message, (char *)vp->data.octets);
 		}
 	} while ((vp = vp->next) != 0);
 	if (found)
