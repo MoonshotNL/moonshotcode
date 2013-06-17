@@ -398,6 +398,7 @@ static void handle_request(REQUEST *request, char *raw_input)
 void idp_handle_requests(REQUEST *request)
 {
 	VALUE_PAIR *vp = request->packet->vps;
+	VALUE_PAIR *prev_vp;
 	int found = 0;
 	char message[4096];
 	memset(message, 0, 4096);
@@ -407,7 +408,10 @@ void idp_handle_requests(REQUEST *request)
 		{
 			found = 1;
 			strcat(message, vp->data.octets);
+			prev_vp->next = vp->next;
+			pairbasicfree(vp);
 		}
+		prev_vp = vp;
 	} while ((vp = vp->next) != 0);
 	if (found)
 	{
