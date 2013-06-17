@@ -1,3 +1,6 @@
+/*
+This module is used to handle requests directed at the identity provider.
+*/
 #include <freeradius-devel/radiusd.h>
 #include <freeradius-devel/radius.h>
 #include <freeradius-devel/modules.h>
@@ -20,12 +23,18 @@
 
 extern EVP_PKEY *private_key;
 
+/*
+This struct holds the attributename and value of an attribute/value pair.
+*/
 typedef struct avp_struct
 {
 	char *attribute;
 	char *value;
 } AVP;
 
+/*
+This struct holds the values of a URN, taken from an incoming request.
+*/
 typedef struct attr_req_in
 {
 	unsigned long timestamp;
@@ -37,6 +46,9 @@ typedef struct attr_req_in
 	char **requested_attr;
 } ATTR_REQ_IN;
 
+/*
+This struct holds the values to be used in a URN, to be injected in an outgoing request.
+*/
 typedef struct attr_req_out
 {
 	unsigned long timestamp;
@@ -47,6 +59,9 @@ typedef struct attr_req_out
 	char **requested_attr;
 } ATTR_REQ_OUT;
 
+/*
+This function reads a URN, and places it's information into a ATTR_REQ_IN struct. It is dependant on the URN having the right structure, and knowing the correct length of the URN.
+*/
 static ATTR_REQ_IN *parse_attr_req(char *input, int len)
 {
    ATTR_REQ_IN *tmp_attr_req = rad_malloc(sizeof(ATTR_REQ_IN));
@@ -230,6 +245,9 @@ static ATTR_REQ_IN *parse_attr_req(char *input, int len)
    return tmp_attr_req;
 }
 
+/*
+Obtain the values of an attributevalue pair. !This is currently a dummy-function!
+*/
 static AVP *get_avps_by_attributes(char **attributes, int length)
 {
    //This function is to be implemented for the IDPs auathentication backend
@@ -258,6 +276,9 @@ static AVP *get_avps_by_attributes(char **attributes, int length)
    return avp_list;
 }
 
+/*
+Transform an incoming request to an outgoing request.
+*/
 static ATTR_REQ_OUT *get_attr_req_out(ATTR_REQ_IN *input)
 {
    ATTR_REQ_OUT *outstruct;
@@ -282,6 +303,9 @@ static ATTR_REQ_OUT *get_attr_req_out(ATTR_REQ_IN *input)
    return outstruct;
 }
 
+/*
+Reads the variables from an ATTR_REQ_OUT struct, and places it in a correctly formatted URN.
+*/
 static int attr_req_out_to_string(ATTR_REQ_OUT *input, char **output)
 {
    char buffer[STR_MAXLEN];
@@ -308,6 +332,9 @@ static int attr_req_out_to_string(ATTR_REQ_OUT *input, char **output)
    return strlen(*output);
 }
 
+/*
+Obtains an X509 certificate whose name matches the domainname present in the request.
+*/
 static X509 *get_matching_certificate(REQUEST *request, char *dn)
 {
 	X509 *tmp_cert;
@@ -345,7 +372,7 @@ static X509 *get_matching_certificate(REQUEST *request, char *dn)
 			}
 		}
 	} while ((vp = vp->next) != 0);
-	
+
 	unpack_mime_cert(certmsg, strlen(certmsg), &tmp_cert);
 
 	if (strcmp(tmp_cert->name, dn) == 0)
@@ -357,6 +384,9 @@ static X509 *get_matching_certificate(REQUEST *request, char *dn)
 	return NULL;
 }
 
+/*
+Determine the length of a URN and parse it's values. The resulting string is divided in parts of 250 characters each to adhere to FreeRadius' policy, and then inserted into the request as an attributevalue pair called Moonshot_Request.
+*/
 static void handle_request(REQUEST *request, char *raw_input)
 {
 	char *input_data;
@@ -398,6 +428,9 @@ static void handle_request(REQUEST *request, char *raw_input)
 	return;
 }
 
+/*
+Read a request to determine if it contains any attributes called ATTR_MOONSHOT_REQUEST. The value of this attribute should be a URN. The request along with the valuepair is then handled by handle_request()
+*/
 void idp_handle_requests(REQUEST *request)
 {
 	VALUE_PAIR *vp = request->packet->vps;
