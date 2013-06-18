@@ -297,7 +297,7 @@ int attr_req_out_to_string(ATTR_REQ_OUT *input, char **output)
 
 	memset(buffer, 0, STR_MAXLEN);
 
-	sprintf(buffer, "%lu:%s:%i", input->timestamp, input->servicedn, input->requested_attr_len);
+	sprintf(buffer, "%lu:%s:%i:", input->timestamp, input->servicedn, input->requested_attr_len);
 	for (i = 0; i < input->requested_attr_len; i++)
 	{
 		if (i == input->requested_attr_len - 1)
