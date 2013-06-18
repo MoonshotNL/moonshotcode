@@ -60,7 +60,7 @@ int postproxy_handle_request(REQUEST *request)
 	char *cert_message;
 	char substr[251];
 	VALUE_PAIR *vp;
-	char *message_attributes, *out_urn, *out_message
+	char *message_attributes, *out_urn, *out_message;
 
 	switch (request->proxy_reply->code)
 	{
