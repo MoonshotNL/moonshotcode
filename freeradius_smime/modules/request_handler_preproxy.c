@@ -59,7 +59,7 @@ int postproxy_handle_request(REQUEST *request)
 	int avp_msglen = 0;
 	char *cert_message;
 	char substr[251];
-	VALUE_PAIR *vp;
+	VALUE_PAIR *vp, *prev_vp;
 	char *message_attributes, *out_urn, *out_message;
 
 	switch (request->proxy_reply->code)
@@ -73,7 +73,14 @@ int postproxy_handle_request(REQUEST *request)
 				{
 					found = 1;
 					strncat(message, vp->data.octets, vp->length);
+					if (vp_prev != NULL)
+					{
+						vp_prev->next = vp->next;
+						free(vp);
+						vp = vp_prev;
+					}
 				}
+				vp_prev = vp;
 			} while ((vp = vp -> next) != 0);
 
 			if (found)
