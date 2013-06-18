@@ -75,6 +75,7 @@ This function reads a URN, and places it's information into a ATTR_REQ_IN struct
 ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len)
 {
 	ATTR_REQ_IN *tmp_attr_req = rad_malloc(sizeof(ATTR_REQ_IN));
+	AVP *tmp_avp;
 
 	int input_cur = 0;
 	int attr_p = 0;
@@ -148,13 +149,10 @@ ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len)
 				if (input[input_cur] == ':')
 				{
 					item_tmp[item_cur] = '\0';
-
-					memcpy(tmp_attr_req->provided_attr + (attr_p * sizeof(AVP)), atoavp(item_tmp), sizeof(AVP));
-					//tmp_attr_req->provided_attr[attr_p] = atoavp(item_tmp);
-               input_cur++;
-               bzero(item_tmp, sizeof(char) * STR_MAXLEN);
-               item_cur = 0;
-
+					
+					tmp_avp = atoavp(item_tmp);
+					memcpy(tmp_attr_req->provided_attr + (attr_p * sizeof(AVP)), tmp_avp, sizeof(AVP));
+					free(tmp_avp):
 					attr_p++;
 
 					if (attr_p >= tmp_attr_req->provided_attr_len)
