@@ -152,7 +152,7 @@ ATTR_REQ_IN *proxy_parse_attr_req(char *input, int len)
 					
 					tmp_avp = atoavp(item_tmp);
 					memcpy(tmp_attr_req->provided_attr + (attr_p * sizeof(AVP)), tmp_avp, sizeof(AVP));
-					free(tmp_avp):
+					free(tmp_avp);
 					attr_p++;
 
 					if (attr_p >= tmp_attr_req->provided_attr_len)
