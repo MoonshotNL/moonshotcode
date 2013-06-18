@@ -59,7 +59,7 @@ int postproxy_handle_request(REQUEST *request)
 	int avp_msglen = 0;
 	char *cert_message;
 	char substr[251];
-	VALUE_PAIR *vp, *prev_vp;
+	VALUE_PAIR *vp, *vp_prev;
 	char *message_attributes, *out_urn, *out_message;
 
 	switch (request->proxy_reply->code)
