@@ -416,8 +416,7 @@ static void handle_request(REQUEST *request, char *raw_input)
 
 	outstruct = get_attr_req_out(attr_request);
 	output_len = attr_req_out_to_string(outstruct, &output_data);
-	smime_msg = pack_smime_text(output_data, private_key, public_certificate);
-	//pack_mime_text(output_data, strlen(output_data), &smime_msg);
+	pack_mime_text(output_data, strlen(output_data), &smime_msg);
 	for (i = 0; i <= (strlen(smime_msg) / 250); i++)
 	{
 		msg_len = i == (strlen(smime_msg) / 250) ? strlen(smime_msg) % 250 : 250;
