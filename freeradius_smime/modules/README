@@ -1,1 +1,34 @@
-//placeholder
+In order to compile and install this module, follow these instructions.
+
+Dependencies:
+	-openssl-devel 1.0.0 or later
+	-gcc
+	-make
+
+1. Get the FreeRADIUS 2.1.12 source code
+2. Compile and install FreeRADIUS using the following commands in the source root of FreeRADIUS 2.1.12:
+	./configure
+	make
+	make install
+3. Copy the module source into .../freeradius_source/src/modules/rlm_moonshot/
+4. In the rlm_moonshot directory, run the following commands:
+	./configure
+	make
+	make install
+5. Register the following attributes in the FreeRADIUS dictionary (/usr/local/share/freeradius/dictionary):
+	ATTRIBUTE	Moonshot-Certificate	245	string
+	ATTRIBUTE	Moonshot-Request		246	string
+	ATTRIBUTE	Moonshot-IDPReply		247	string
+	ATTRIBUTE	Moonshot-ProxyReply	248	string
+6. Create the config file /usr/local/etc/raddb/moonshot:
+	moonshot {
+		pub_key = "path/to/key.pem"
+		priv_key = "path/to/privkey.pem"
+		priv_key_password = "privkey.pem password"
+	}
+7. Add "moonshot" to the following sections of the /usr/local/etc/raddb/sites-enabled/default config file:
+	post-auth
+	pre-proxy
+	post-proxy
+
+Following these steps should succesfully get the FreeRADIUS Moonshot module to work next time the FreeRADIUS daemon is run.
